@@ -9,10 +9,6 @@
 ~ Generic Default 	- dude, that's a dude
 ---------------------------------------------------------*/
 
-local ToggleSights	= CreateClientConVar("ToggleSights", 0, true, false, "Makes it so ironsights are toggled, and not held")		// Enable/Disable
-local UseGDCBullets = CreateClientConVar("UseGDCBullets", 1, true, false, "Use GDC bullet entities")
-local RecoilMult 	= CreateClientConVar("RecoilMult", 1.00, true, false, "Recoil multiplier. Do you want more, or less?")
-
 // Weapon Descriptions
 SWEP.Category				= "Homefront"
 SWEP.Author					= "\nZookie, Marlwolf, Magenta, Generic Default"
@@ -21,7 +17,7 @@ SWEP.Purpose				= "BTB SWeps"
 SWEP.Instructions			= "E + R = Holster\nE + Left Mouse = Select Fire\nE + Right Mouse = Melee"
 
 // Settings
-SWEP.ViewModel				= Model("models/weapons/homefront/v_pistol_m9.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4_nokey.mdl")
 SWEP.WorldModel				= Model("models/weapons/homefront/w_pistol_m9.mdl")
 SWEP.ViewModelFOV			= 50		
 SWEP.ViewModelFlip			= false		
@@ -30,15 +26,16 @@ SWEP.Spawnable				= true
 SWEP.AdminSpawnable			= true
 
 // Primary
-SWEP.Primary.Sound 			= Sound("Weapon_HFM9.Single")				
+SWEP.Primary.Sound 			= Sound("Weapon_HFM4.Single")			
+SWEP.Primary.SoundEnd 			= Sound("Weapon_HFM4.SingleEnd")		
 SWEP.Primary.Round 			= ("")									
-SWEP.Primary.RPM			= 1100					// This is in Rounds Per Minute
-SWEP.Primary.ClipSize		= 12				// Size of a clip
-SWEP.Primary.DefaultClip	= 120				// Default number of bullets in a clip
+SWEP.Primary.RPM			= 800					// This is in Rounds Per Minute
+SWEP.Primary.ClipSize		= 30				// Size of a clip
+SWEP.Primary.DefaultClip	= 240				// Default number of bullets in a clip
 SWEP.Primary.KickUp			= 2					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
-SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
+SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "pistol"
 
@@ -60,7 +57,9 @@ SWEP.RunSightsAng 			= Vector (0, 0, 0)
 // Shells
 SWEP.EjectsShells 		= true
 SWEP.ShellDelay 		= 0
-SWEP.ShellEffect 		= "sim_shelleject_fas_9x19mm"
+SWEP.ShellEffect 		= "sim_shelleject_fas_556"
+
+SWEP.Rifle = true
 
 SWEP.Offset = {
 	Pos = 
@@ -80,7 +79,9 @@ SWEP.Offset = {
 /*
 ANIM LIST:
 
-~M9~
+//
+// M9
+//
 Draw: 			ACT_VM_DRAW
 First-Draw: 	ACT_VM_DRAW_EMPTY
 
@@ -96,6 +97,24 @@ ADS Fire: 		ACT_VM_PRIMARYATTACK_2
 Reload: 		ACT_VM_RELOAD
 Reload Empty: 	ACT_VM_RELOAD_EMPTY
 
+//
+// M4
+//
+Draw: 			ACT_VM_DRAW
+First-Draw: 	ACT_VM_DRAW_EMPTY
+
+Holster: 		ACT_VM_HOLSTER
+Quick-Holster: 	ACT_VM_HOLSTER_EMPTY
+
+Idle: 			ACT_VM_IDLE
+ADS Idle: 		ACT_VM_IDLE_2
+
+Fire1: 			ACT_VM_PRIMARYATTACK
+ADS Fire: 		ACT_VM_PRIMARYATTACK_2
+
+Reload: ACT_VM_RELOAD
+Reload Branch Dry: ACT_VM_DEPLOY_1
+Reload Branch Tact: ACT_VM_DEPLOY_2
 */
 
 /*---------------------------------------------------------
@@ -132,6 +151,16 @@ Deploy
 ---------------------------------------------------------*/
 function SWEP:Deploy()
 
+	// Setup Bodygroups
+	if self.Owner:IsPlayer() and file.Exists("Plyr_BTB_Hands/"..self.Owner:UniqueID()..".txt","DATA") then
+		self.Owner:GetViewModel():SetBodygroup(1,1)
+		self.Owner:GetViewModel():SetBodygroup(2,1)
+		self.Owner:GetViewModel():SetBodygroup(3,1)
+	end
+
+	// Set the hold-type
+	self:SetWeaponHoldType(self.HoldType)
+
 	// Draw animations
 	if self:GetNWBool("FirstDeploy") then
 		self:SetNWBool("FirstDeploy", false)
@@ -167,6 +196,14 @@ function SWEP:Holster(wep)
 
 end
 
+function SWEP:CanPrimaryAttack()
+	if ( self.Weapon:Clip1() <= 0 ) or CurTime() < self:GetNWFloat("InReload") then
+		self.Weapon:StopSound(self.Primary.Sound)
+		return false
+	else
+		return true
+	end
+end
 
 /*---------------------------------------------------------
 PrimaryAttack
@@ -175,12 +212,8 @@ PrimaryAttack
 ---------------------------------------------------------*/
 function SWEP:PrimaryAttack()
 
-	// Return Conditions
-	if self.Weapon:Clip1() <= 0 then
-		self:Reload()
-		return
-	end
-	
+	if !self:CanPrimaryAttack() then return end
+
 	// Animate!
 	if self:GetNWBool("InIron") then
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
@@ -191,7 +224,16 @@ function SWEP:PrimaryAttack()
 	// Shoot!
 	self:ShootBullet(math.Rand(20,30), 1, 0) 	-- damage, numbullets, cone
 	self.Weapon:TakePrimaryAmmo(1)
-	self.Weapon:EmitSound(self.Primary.Sound)
+	
+	if !self.Rifle then
+		self.Weapon:EmitSound(self.Primary.Sound)
+	else
+		if self.Weapon:Clip1() <= 0 then
+			self.Weapon:StopSound(self.Primary.Sound)
+			self.Weapon:EmitSound(self.Primary.SoundEnd)
+		end
+	end
+	
 	self:ShootFX()
 	self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 
@@ -216,11 +258,11 @@ function SWEP:ShootFX()
 	-- Calculate angles
 	local anglo
 	if self.Owner:KeyDown(IN_DUCK) then
-		anglo = Angle(math.Rand(-(self.Primary.KickDown/2)*RecoilMult:GetFloat(),(self.Primary.KickUp/2)*RecoilMult:GetFloat()), math.Rand(-(self.Primary.KickHorizontal/4)*RecoilMult:GetFloat(),(self.Primary.KickHorizontal/4)*RecoilMult:GetFloat()), 0)
+		anglo = Angle(math.Rand(-(self.Primary.KickDown/2),(self.Primary.KickUp/2)), math.Rand(-(self.Primary.KickHorizontal/4),(self.Primary.KickHorizontal/4)), 0)
 	elseif self:GetNWBool("InIron") then
-		anglo = Angle(math.Rand(-(self.Primary.KickDown/1.5)*RecoilMult:GetFloat(),(self.Primary.KickUp/1.5)*RecoilMult:GetFloat()), math.Rand(-(self.Primary.KickHorizontal/1.5)*RecoilMult:GetFloat(),(self.Primary.KickHorizontal/1.5)*RecoilMult:GetFloat()), 0)
+		anglo = Angle(math.Rand(-(self.Primary.KickDown/1.5),(self.Primary.KickUp/1.5)), math.Rand(-(self.Primary.KickHorizontal/1.5),(self.Primary.KickHorizontal/1.5)), 0)
 	else
-		anglo = Angle(math.Rand(-(self.Primary.KickDown)*RecoilMult:GetFloat(),(self.Primary.KickUp)*RecoilMult:GetFloat()), math.Rand(-(self.Primary.KickHorizontal)*RecoilMult:GetFloat(),(self.Primary.KickHorizontal)*RecoilMult:GetFloat()), 0)
+		anglo = Angle(math.Rand(-(self.Primary.KickDown),(self.Primary.KickUp)), math.Rand(-(self.Primary.KickHorizontal),(self.Primary.KickHorizontal)), 0)
 	end
 	-- Do recoil with angles
 	self.Owner:ViewPunch(anglo)
@@ -237,7 +279,7 @@ function SWEP:ShootFX()
 				fx:SetEntity(self.Weapon)
 				fx:SetNormal(self.Owner:GetAimVector())
 				fx:SetAttachment("2")
-				if CLIENT then util.Effect(self.ShellEffect,fx) end
+				util.Effect(self.ShellEffect,fx)
 			end
 		end)
 	end
@@ -307,16 +349,37 @@ but hey, it works.
 ---------------------------------------------------------*/
 function SWEP:Reload()
 	
+	// Returns
+	if self.Weapon:Clip1() >= self.Primary.ClipSize  then return end
+
 	// Exit ironsights
 	if self:GetNWBool("InIron") then
 		self:SecondaryAttack()
 	end
 
 	// Animation
-	if self.Weapon:Clip1() <= 0 then
-		self.Weapon:DefaultReload(ACT_VM_RELOAD_EMPTY)
-	else
+	if self.Rifle then // Rifle reloads
 		self.Weapon:DefaultReload(ACT_VM_RELOAD)
+		self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.1)
+		timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
+		function()
+			if IsValid(self.Weapon) and IsValid(self.Owner) then
+				if self.Weapon:Clip1() > 0 then
+					self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
+				else
+					self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
+				end
+				self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			end
+		end)
+	else // Other reloads
+		if self.Weapon:Clip1() <= 0 then
+			self.Weapon:DefaultReload(ACT_VM_RELOAD_EMPTY)
+		else
+			self.Weapon:DefaultReload(ACT_VM_RELOAD)
+		end
 	end
 	
 end
@@ -329,6 +392,17 @@ Think
 ---------------------------------------------------------*/
 function SWEP:Think()
 
+	// Handle sound loops
+	if self:CanPrimaryAttack() then
+		if self.Owner:KeyPressed(IN_ATTACK) then
+			self.Weapon:EmitSound(self.Primary.Sound)
+		end
+		if self.Owner:KeyReleased(IN_ATTACK) then
+			self.Weapon:StopSound(self.Primary.Sound)
+			self.Weapon:EmitSound(self.Primary.SoundEnd)
+		end
+	end
+
 	// Hold for ADS
 	if self.Owner:KeyReleased(IN_ATTACK2) and self:GetNWBool("InIron") and IsFirstTimePredicted() then
 		self:SecondaryAttack()
@@ -337,7 +411,7 @@ function SWEP:Think()
 	// Sway values
 	if self:GetNWBool("InIron") then
 		self.SwayScale = 0.2
-		self.BobScale = 0.2
+		self.BobScale = 0.1
 	else
 		self.SwayScale 	= 1
 		self.BobScale 	= 1

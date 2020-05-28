@@ -22,44 +22,11 @@
 	
 }
 
-
-
-
-
-
-
-
-{
-	"channel"		"CHAN_ITEM"
-	"volume"		"1.0"
-	"CompatibilityAttenuation"	"1.0"
-	"pitch"		"PITCH_NORM"
-
-	"wave"			"weapons/homefront/m9/m9_magin.wav"
-}
-
-
-{
-	"channel"		"CHAN_ITEM"
-	"volume"		"1.0"
-	"CompatibilityAttenuation"	"1.0"
-	"pitch"		"PITCH_NORM"
-
-	"wave"			"weapons/homefront/m9/m9_slideclink.wav"
-}
-
-"Weapon_HFM9.SlideShunk"
-{
-	"channel"		"CHAN_ITEM"
-	"volume"		"1.0"
-	"CompatibilityAttenuation"	"1.0"
-	"pitch"		"PITCH_NORM"
-
-	"wave"			"weapons/homefront/m9/m9_slideclink.wav"
-}
-
 */
 
+//
+// M9
+//
 sound.Add({
 	name 	= "Weapon_HFM9.Single",
 	channel = CHAN_WEAPON,
@@ -105,3 +72,64 @@ sound.Add({
 	sound 	=  "weapons/homefront/m9/m9_slideclink.wav" 
 })
 util.PrecacheSound("Weapon_HFM9.SlideShunk")
+
+//
+// M4
+//
+
+sound.Add({
+	name 	= "Weapon_HFM4.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/m4/m4_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFM4.Single")
+
+sound.Add({
+	name 	= "Weapon_HFM4.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/m4/m4_fireloop_end.wav" 
+})
+util.PrecacheSound("Weapon_HFM4.SingleEnd")
+
+sound.Add({
+	name 	= "Weapon_HFM4.HandOnWeapon",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  {"weapons/homefront/m4/m4_handtowpn.wav","weapons/homefront/m4/m4_handtowpn2.wav"}
+})
+util.PrecacheSound("Weapon_HFM4.HandOnWeapon")
+
+sound.Add({
+	name 	= "Weapon_HFM4.MagLock",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m4/m4_maglock.wav" 
+})
+util.PrecacheSound("Weapon_HFM4.MagLock")
+
+sound.Add({
+	name 	= "Weapon_HFM4.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m4/m4_magout.wav" 
+})
+util.PrecacheSound("Weapon_HFM4.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFM4.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  {"weapons/homefront/m4/m4_magin.wav",
+    "weapons/homefront/m4/m4_magin2.wav",
+    "weapons/homefront/m4/m4_magin3.wav",
+    }
+})
+util.PrecacheSound("Weapon_HFM4.MagIn")

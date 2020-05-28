@@ -3,11 +3,10 @@
 ~
 ~ These are mainly meant to be used in SP. MP polish is WIP.
 ~
-~ Generic Default 	- The only guy who really did anything cool tbh
-~ Zookie 			- lmao fuck this guy
-~ Marlwolf 			- bro
-~ Magenta 			- Dude she's so angry at me like why
-~ Siminov 			- I'd suck his dick but he'd probably get to mine first
+~ Zookie 			- dude, that's me
+~ Marlwolf 			- dude, he's kinda cute
+~ Magenta 			- dude, she hates my soul
+~ Generic Default 	- dude, that's a dude
 ---------------------------------------------------------*/
 
 local ToggleSights	= CreateClientConVar("ToggleSights", 0, true, false, "Makes it so ironsights are toggled, and not held")		// Enable/Disable
@@ -33,14 +32,15 @@ SWEP.AdminSpawnable			= true
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFM9.Single")				
 SWEP.Primary.Round 			= ("")									
-SWEP.Primary.RPM			= 600					// This is in Rounds Per Minute
+SWEP.Primary.RPM			= 1100					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 12				// Size of a clip
 SWEP.Primary.DefaultClip	= 120				// Default number of bullets in a clip
-SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
+SWEP.Primary.KickUp			= 2					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
 SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
+SWEP.HoldType 				= "pistol"
 
 // Secondary
 SWEP.Secondary.ClipSize		= 0					// Size of a clip
@@ -58,11 +58,24 @@ SWEP.RunSightsPos 			= Vector (0, 0, 0)
 SWEP.RunSightsAng 			= Vector (0, 0, 0)
 
 // Shells
-SWEP.EjectsShells 			= false
-SWEP.ShellDelay 			= 0
-SWEP.ShellEffect 			= ""
+SWEP.EjectsShells 		= true
+SWEP.ShellDelay 		= 0
+SWEP.ShellEffect 		= "sim_shelleject_fas_9x19mm"
 
-SWEP.HoldType = "pistol"
+SWEP.Offset = {
+	Pos = 
+	{
+	Up = 1,  		-- Z Axis	(Up/Down)
+	Right = 0.5, 		-- X Axis	(Left/Right)
+	Forward = 1, 	-- Y Axis	(Back/Forward)
+	},
+	Ang = 
+	{
+	Up = 0,		-- Rotate	(Left/Right)
+	Right = 0,		-- Rolling``	(Back/Forth)
+	Forward = 0,	-- Rolling	(Left/Right)
+	}
+}
 
 /*
 ANIM LIST:
@@ -107,7 +120,7 @@ Equip(ply)
 or picked up, the first draw animation is played.
 ---------------------------------------------------------*/
 function SWEP:Equip(ply)
-	return
+	self:SetNWBool("FirstDeploy", true)
 end
 
 
@@ -119,12 +132,39 @@ Deploy
 ---------------------------------------------------------*/
 function SWEP:Deploy()
 
-	self:SetNWBool("InIron", false)
-
 	// Draw animations
-	self.Weapon:SendWeaponAnim(ACT_VM_DRAW)
+	if self:GetNWBool("FirstDeploy") then
+		self:SetNWBool("FirstDeploy", false)
+		self.Weapon:SendWeaponAnim(ACT_VM_DRAW_EMPTY)
+	else
+		self.Weapon:SendWeaponAnim(ACT_VM_DRAW)
+	end
+	
+	// Setup Variables
+	self:SetNWBool("FirstHolster", true)
+	self:SetNWBool("InIron", false)
+	self:SetNWFloat("PlayerFOV", self.Owner:GetFOV())
+
 	return true
 	
+end
+
+function SWEP:Holster(wep)
+
+	if self:GetNWBool("FirstHolster") then
+		self:SetNWBool("FirstHolster", false)
+		self.Weapon:SendWeaponAnim(ACT_VM_HOLSTER)
+		timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
+		function() 
+			if SERVER and IsValid(self.Owner) and IsValid(wep) then
+				self.Owner:SelectWeapon(wep)
+			end
+		end)
+		return false
+	else
+		return true
+	end
+
 end
 
 
@@ -168,6 +208,10 @@ function SWEP:ShootFX()
 	
 	if !IsFirstTimePredicted() then return end
 
+	// Third Person effects
+	self.Owner:SetAnimation( PLAYER_ATTACK1 )	-- This is the third person animation
+	self.Owner:MuzzleFlash()					-- Muzzle light from shooting
+
 	// Recoil
 	-- Calculate angles
 	local anglo
@@ -184,9 +228,8 @@ function SWEP:ShootFX()
 		self.Owner:SetEyeAngles(self.Owner:EyeAngles() - anglo)
 	end
 
+	// FX  Data
 	local fx = EffectData()
-	
-	/*
 	// Shell ejection
 	if self.EjectsShells then
 		timer.Simple(self.ShellDelay, function()
@@ -198,18 +241,12 @@ function SWEP:ShootFX()
 			end
 		end)
 	end
-	*/
-
 	// Muzzle flash
 	fx:SetEntity(self.Weapon)
 	fx:SetOrigin(self.Owner:GetShootPos())
 	fx:SetNormal(self.Owner:GetAimVector())
 	fx:SetAttachment("1")
 	util.Effect("effect_fok_flashsmoke",fx)
-	
-	// Third Person effects
-	self.Owner:SetAnimation( PLAYER_ATTACK1 )	-- This is the third person animation
-	self.Owner:MuzzleFlash()					-- Muzzle light from shooting
 end
 
 
@@ -228,7 +265,7 @@ function SWEP:ShootBullet( damage, num_bullets, aimcone )
 	bullet.Src 		= self.Owner:GetShootPos() -- Source
 	bullet.Dir 		= self.Owner:GetAimVector() -- Dir of bullet
 	bullet.Spread 	= Vector( aimcone, aimcone, 0 )	-- Aim Cone
-	bullet.Tracer	= 1 -- Show a tracer on every x bullets
+	bullet.Tracer	= 0 -- Show a tracer on every x bullets
 	bullet.Force	= (0.1*damage) -- Amount of force to give to phys objects
 	bullet.Damage	= damage
 	bullet.AmmoType = "Pistol"
@@ -246,13 +283,15 @@ predicted and other junk.
 ---------------------------------------------------------*/
 function SWEP:SecondaryAttack()
 
+	local zoom = self:GetNWFloat("PlayerFOV") - 10
+
 	if !self:GetNWBool("InIron") then
 		self:SetNWBool("InIron", true)
-		print("true")
+		self.Owner:SetFOV(zoom, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2)
 	elseif self:GetNWBool("InIron") then
 		self:SetNWBool("InIron", false)
-		print("false")
+		self.Owner:SetFOV(0, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
 	end
 
@@ -268,10 +307,12 @@ but hey, it works.
 ---------------------------------------------------------*/
 function SWEP:Reload()
 	
+	// Exit ironsights
 	if self:GetNWBool("InIron") then
-		self:SetNWBool("InIron", false)
+		self:SecondaryAttack()
 	end
 
+	// Animation
 	if self.Weapon:Clip1() <= 0 then
 		self.Weapon:DefaultReload(ACT_VM_RELOAD_EMPTY)
 	else
@@ -281,16 +322,19 @@ function SWEP:Reload()
 end
 
 
-
 /*---------------------------------------------------------
-Sway
+Think
 
-- Called in Think.
-- Sets Bob and Sway scales. Can be handy to adjust these for 
-different situations, such as more bob\sway when running, 
-etc.
+- Think is called every frame / tick
 ---------------------------------------------------------*/
-function SWEP:Sway()
+function SWEP:Think()
+
+	// Hold for ADS
+	if self.Owner:KeyReleased(IN_ATTACK2) and self:GetNWBool("InIron") and IsFirstTimePredicted() then
+		self:SecondaryAttack()
+	end
+
+	// Sway values
 	if self:GetNWBool("InIron") then
 		self.SwayScale = 0.2
 		self.BobScale = 0.2
@@ -298,18 +342,6 @@ function SWEP:Sway()
 		self.SwayScale 	= 1
 		self.BobScale 	= 1
 	end
-end
-
-
-
-/*---------------------------------------------------------
-Think
-
-- Think is called every frame / tick
----------------------------------------------------------*/
-function SWEP:Think()
-	
-	self:Sway()
 
 end
 

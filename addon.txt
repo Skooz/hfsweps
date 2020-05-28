@@ -1,0 +1,11 @@
+"AddonInfo"
+{
+	"name"		"Homefront"
+	"version"	"2"
+	"up_date"	""
+	"author_name"	"Zookie, Marlwolf, Magenta"
+	"author_email"	""
+	"author_url"	""
+	"info"		""
+	"override"	"0"
+}

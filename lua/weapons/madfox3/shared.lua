@@ -29,7 +29,7 @@ SWEP.AdminSpawnable			= true
 SWEP.Primary.Sound 			= Sound("Weapon_HFM4.Single")			
 SWEP.Primary.SoundEnd 			= Sound("Weapon_HFM4.SingleEnd")		
 SWEP.Primary.Round 			= ("")									
-SWEP.Primary.RPM			= 800					// This is in Rounds Per Minute
+SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 240				// Default number of bullets in a clip
 SWEP.Primary.KickUp			= 2					// Maximum up recoil (rise)
@@ -152,10 +152,10 @@ Deploy
 function SWEP:Deploy()
 
 	// Setup Bodygroups
-	if self.Owner:IsPlayer() and file.Exists("Plyr_BTB_Hands/"..self.Owner:UniqueID()..".txt","DATA") then
-		self.Owner:GetViewModel():SetBodygroup(1,1)
-		self.Owner:GetViewModel():SetBodygroup(2,1)
-		self.Owner:GetViewModel():SetBodygroup(3,1)
+	if self.Owner:IsPlayer() then
+		self.Owner:GetViewModel():SetBodygroup(1,1) // Hands
+		self.Owner:GetViewModel():SetBodygroup(2,1) // Sight
+		self.Owner:GetViewModel():SetBodygroup(3,1) // Frontsight
 	end
 
 	// Set the hold-type
@@ -170,6 +170,9 @@ function SWEP:Deploy()
 	end
 	
 	// Setup Variables
+	self:SetNWFloat("InDeploy", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+	self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+	self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 	self:SetNWBool("FirstHolster", true)
 	self:SetNWBool("InIron", false)
 	self:SetNWFloat("PlayerFOV", self.Owner:GetFOV())
@@ -183,6 +186,9 @@ function SWEP:Holster(wep)
 	if self:GetNWBool("FirstHolster") then
 		self:SetNWBool("FirstHolster", false)
 		self.Weapon:SendWeaponAnim(ACT_VM_HOLSTER)
+		self:SetNWFloat("InHolster", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
 		function() 
 			if SERVER and IsValid(self.Owner) and IsValid(wep) then
@@ -197,7 +203,7 @@ function SWEP:Holster(wep)
 end
 
 function SWEP:CanPrimaryAttack()
-	if ( self.Weapon:Clip1() <= 0 ) or CurTime() < self:GetNWFloat("InReload") then
+	if (self.Weapon:Clip1() <= 0) or CurTime() < self:GetNWFloat("InReload") or CurTime() < self:GetNWFloat("InHolster") or CurTime() < self:GetNWFloat("InDeploy") then
 		self.Weapon:StopSound(self.Primary.Sound)
 		return false
 	else
@@ -393,13 +399,14 @@ Think
 function SWEP:Think()
 
 	// Handle sound loops
-	if self:CanPrimaryAttack() then
-		if self.Owner:KeyPressed(IN_ATTACK) then
-			self.Weapon:EmitSound(self.Primary.Sound)
-		end
-		if self.Owner:KeyReleased(IN_ATTACK) then
-			self.Weapon:StopSound(self.Primary.Sound)
-			self.Weapon:EmitSound(self.Primary.SoundEnd)
+	if self.Rifle then
+		if self:CanPrimaryAttack() and IsFirstTimePredicted() then
+			if self.Owner:KeyDown(IN_ATTACK) then
+				self.Weapon:EmitSound(self.Primary.Sound)
+			elseif self.Owner:KeyReleased(IN_ATTACK) then
+				self.Weapon:StopSound(self.Primary.Sound)
+				self.Weapon:EmitSound(self.Primary.SoundEnd)
+			end
 		end
 	end
 

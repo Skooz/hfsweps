@@ -347,6 +347,28 @@ end
 
 
 /*---------------------------------------------------------
+FireRocket
+
+- Called in PrimaryAttack
+- Rockets are entities, as are Generic Default's bullets
+- Think of GD's bullets as mini rockets
+---------------------------------------------------------*/
+function SWEP:FireRocket() 
+
+	if SERVER then
+		local bullet = ents.Create(self.Primary.Round)
+		if !bullet:IsValid() then return false end
+		bullet:SetAngles(self.Owner:GetAimVector():Angle()+Angle(90,0,0))
+		bullet:SetPos(self.Owner:GetShootPos())
+		bullet:SetOwner(self.Owner)
+		bullet:Spawn()
+		bullet:Activate()
+	end
+
+end
+
+
+/*---------------------------------------------------------
 SecondaryAttack
 
 - Ironsights stuff is handled here because it's neatly

@@ -17,11 +17,11 @@ SWEP.Purpose				= "BTB SWeps"
 SWEP.Instructions			= "E + R = Holster\nE + Left Mouse = Select Fire\nE + Right Mouse = Melee"
 
 // Settings
-SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4_nokey.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4_gl.mdl")
 SWEP.WorldModel				= Model("models/weapons/homefront/w_pistol_m9.mdl")
 SWEP.ViewModelFOV			= 50		
 SWEP.ViewModelFlip			= false		
-SWEP.DrawCrosshair			= false	
+SWEP.DrawCrosshair			= true	
 SWEP.Spawnable				= true
 SWEP.AdminSpawnable			= true
 
@@ -34,16 +34,16 @@ SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 240				// Default number of bullets in a clip
 SWEP.Primary.KickUp			= 2					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
-SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
+SWEP.Primary.KickHorizontal	= 0.2					// Maximum side recoil (koolaid)
 SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "pistol"
 
 // Secondary
-SWEP.Secondary.ClipSize		= 0					// Size of a clip
-SWEP.Secondary.DefaultClip	= 0					// Default number of bullets in a clip
+SWEP.Secondary.ClipSize		= 1					// Size of a clip
+SWEP.Secondary.DefaultClip	= 3					// Default number of bullets in a clip
 SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
-SWEP.Secondary.Ammo			= "none"
+SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.IronFOV		= 65	// UNUSED
 
 // Deprecated - Just a helper (for now) for this addon
@@ -115,6 +115,22 @@ ADS Fire: 		ACT_VM_PRIMARYATTACK_2
 Reload: ACT_VM_RELOAD
 Reload Branch Dry: ACT_VM_DEPLOY_1
 Reload Branch Tact: ACT_VM_DEPLOY_2
+
+//
+// M4 GL
+//
+
+Idle Snap: ACT_VM_IDLE_4
+
+Under Draw:  ACT_VM_DEPLOY_3
+Under Holster: ACT_VM_UNDEPLOY_1
+Under Quick Holster: ACT_VM_UNDEPLOY_@
+
+Under Idle: ACT_VM_IDLE_3
+
+Under Fire: ACT_VM_PRIMARYATTACK_3
+
+Under Reload: ACT_VM_RELOAD_DEPLOYED
 */
 
 /*---------------------------------------------------------
@@ -170,6 +186,7 @@ function SWEP:Deploy()
 	end
 	
 	// Setup Variables
+	self:SetNWBool("UnderBarrel", false)
 	self:SetNWFloat("InDeploy", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 	self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 	self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
@@ -220,28 +237,34 @@ function SWEP:PrimaryAttack()
 
 	if !self:CanPrimaryAttack() then return end
 
-	// Animate!
-	if self:GetNWBool("InIron") then
-		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
+	if self:GetNWBool("UnderBarrel") then
+		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
+		self.Weapon:TakeSecondaryAmmo(1)
+		self:FireRocket()
 	else
-		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-	end
-	
-	// Shoot!
-	self:ShootBullet(math.Rand(20,30), 1, 0) 	-- damage, numbullets, cone
-	self.Weapon:TakePrimaryAmmo(1)
-	
-	if !self.Rifle then
-		self.Weapon:EmitSound(self.Primary.Sound)
-	else
-		if self.Weapon:Clip1() <= 0 then
-			self.Weapon:StopSound(self.Primary.Sound)
-			self.Weapon:EmitSound(self.Primary.SoundEnd)
+		// Animate!
+		if self:GetNWBool("InIron") then
+			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
+		else
+			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 		end
+		
+		// Shoot!
+		self:ShootBullet(math.Rand(20,30), 1, 0) 	-- damage, numbullets, cone
+		self.Weapon:TakePrimaryAmmo(1)
+		
+		if !self.Rifle then
+			self.Weapon:EmitSound(self.Primary.Sound)
+		else
+			if self.Weapon:Clip1() <= 0 then
+				self.Weapon:StopSound(self.Primary.Sound)
+				self.Weapon:EmitSound(self.Primary.SoundEnd)
+			end
+		end
+		
+		self:ShootFX()
+		self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 	end
-	
-	self:ShootFX()
-	self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 
 end
 
@@ -313,7 +336,7 @@ function SWEP:ShootBullet( damage, num_bullets, aimcone )
 	bullet.Src 		= self.Owner:GetShootPos() -- Source
 	bullet.Dir 		= self.Owner:GetAimVector() -- Dir of bullet
 	bullet.Spread 	= Vector( aimcone, aimcone, 0 )	-- Aim Cone
-	bullet.Tracer	= 0 -- Show a tracer on every x bullets
+	bullet.Tracer	= 1 -- Show a tracer on every x bullets
 	bullet.Force	= (0.1*damage) -- Amount of force to give to phys objects
 	bullet.Damage	= damage
 	bullet.AmmoType = "Pistol"
@@ -356,35 +379,39 @@ but hey, it works.
 function SWEP:Reload()
 	
 	// Returns
-	if self.Weapon:Clip1() >= self.Primary.ClipSize  then return end
+	if self.Weapon:Clip1() >= self.Primary.ClipSize or self.Owner:KeyDown(IN_USE) then return end
 
-	// Exit ironsights
-	if self:GetNWBool("InIron") then
-		self:SecondaryAttack()
-	end
+	if self:GetNWBool("UnderBarrel") then
 
-	// Animation
-	if self.Rifle then // Rifle reloads
-		self.Weapon:DefaultReload(ACT_VM_RELOAD)
-		self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.1)
-		timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
-		function()
-			if IsValid(self.Weapon) and IsValid(self.Owner) then
-				if self.Weapon:Clip1() > 0 then
-					self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
-				else
-					self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
-				end
-				self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			end
-		end)
-	else // Other reloads
-		if self.Weapon:Clip1() <= 0 then
-			self.Weapon:DefaultReload(ACT_VM_RELOAD_EMPTY)
-		else
+	else
+		// Exit ironsights
+		if self:GetNWBool("InIron") then
+			self:SecondaryAttack()
+		end
+
+		// Animation
+		if self.Rifle then // Rifle reloads
 			self.Weapon:DefaultReload(ACT_VM_RELOAD)
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.1)
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
+			function()
+				if IsValid(self.Weapon) and IsValid(self.Owner) then
+					if self.Weapon:Clip1() > 0 then
+						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
+					else
+						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
+					end
+					self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				end
+			end)
+		else // Other reloads
+			if self.Weapon:Clip1() <= 0 then
+				self.Weapon:DefaultReload(ACT_VM_RELOAD_EMPTY)
+			else
+				self.Weapon:DefaultReload(ACT_VM_RELOAD)
+			end
 		end
 	end
 	
@@ -398,8 +425,38 @@ Think
 ---------------------------------------------------------*/
 function SWEP:Think()
 
+//
+// M4 GL
+//
+/*
+Idle Snap: ACT_VM_IDLE_4
+
+Under Draw:  ACT_VM_DEPLOY_3
+Under Holster: ACT_VM_UNDEPLOY_1
+Under Quick Holster: ACT_VM_UNDEPLOY_@
+
+Under Idle: ACT_VM_IDLE_3
+
+Under Fire: ACT_VM_PRIMARYATTACK_3
+
+Under Reload: ACT_VM_RELOAD_DEPLOYED
+*/
+
+	// Underbarrel
+	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
+		if !self:GetNWBool("UnderBarrel") then
+			self:SetNWBool("UnderBarrel", true)
+			self.Primary.Automatic = false
+			self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_3)
+		elseif self:GetNWBool("UnderBarrel") then
+			self.Primary.Automatic = true
+			self:SetNWBool("UnderBarrel", false)
+			self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
+		end
+	end
+
 	// Handle sound loops
-	if self.Rifle then
+	if self.Rifle and !self:GetNWBool("UnderBarrel") then
 		if self:CanPrimaryAttack() and IsFirstTimePredicted() then
 			if self.Owner:KeyDown(IN_ATTACK) then
 				self.Weapon:EmitSound(self.Primary.Sound)

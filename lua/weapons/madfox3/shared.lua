@@ -17,7 +17,7 @@ SWEP.Purpose				= "BTB SWeps"
 SWEP.Instructions			= "E + R = Holster\nE + Left Mouse = Select Fire\nE + Right Mouse = Melee"
 
 // Settings
-SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4_gl.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4.mdl")
 SWEP.WorldModel				= Model("models/weapons/homefront/w_pistol_m9.mdl")
 SWEP.ViewModelFOV			= 50		
 SWEP.ViewModelFlip			= false		
@@ -34,7 +34,7 @@ SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 240				// Amount of ammo you spawn with
 SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= -0.5					// Maximum down recoil (skeet)
-SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
+SWEP.Primary.KickHorizontal	= 0.8					// Maximum side recoil (koolaid)
 SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "pistol"
@@ -60,12 +60,22 @@ SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 
 // M4
---SWEP.Rifle = true
---SWEP.AnimDraw = ACT_VM_DRAW
---SWEP.AnimDrawEmpty = ACT_VM_DRAW_EMPTY
+-- SWEP.Rifle = true
+-- SWEP.UnderLauncher = false
+-- SWEP.UnderKey		= true
+-- SWEP.AnimDraw = ACT_VM_DRAW
+-- SWEP.AnimDrawEmpty = ACT_VM_DRAW_EMPTY
+
+// M4 GL
+-- SWEP.Rifle = true
+-- SWEP.UnderLauncher = true
+-- SWEP.UnderKey		= true
+-- SWEP.AnimDraw 		= ACT_VM_DEPLOY
+-- SWEP.AnimDrawEmpty 	= ACT_VM_DEPLOY
 
 SWEP.Rifle = true
-SWEP.UnderLauncher = true
+SWEP.UnderLauncher = false
+SWEP.UnderKey		= true
 SWEP.AnimDraw 		= ACT_VM_DEPLOY
 SWEP.AnimDrawEmpty 	= ACT_VM_DEPLOY
 
@@ -132,13 +142,25 @@ Idle Snap: ACT_VM_IDLE_4
 
 Under Draw:  ACT_VM_DEPLOY_3
 Under Holster: ACT_VM_UNDEPLOY_1
-Under Quick Holster: ACT_VM_UNDEPLOY_@
+Under Quick Holster: ACT_VM_UNDEPLOY_2
 
 Under Idle: ACT_VM_IDLE_3
 
 Under Fire: ACT_VM_PRIMARYATTACK_3
 
 Under Reload: ACT_VM_RELOAD_DEPLOYED
+
+//
+// m4 key
+//
+
+under fire: ACT_VM_PRIMARYATTACK_3
+
+under reload dry: ACT_SHOTGUN_PUMP
+under reload tact: ACT_SHOTGUN_RELOAD_FINISH
+reload root: ACT_VM_RELOAD
+reload start: ACT_SHOTGUN_RELOAD_START
+
 */
 
 /*---------------------------------------------------------
@@ -208,6 +230,8 @@ end
 
 function SWEP:Holster(wep)
 
+	if !IsValid(self.Owner) or !IsValid(wep) or !IsValid(self.Weapon) then return end
+
 	if self:GetNWBool("FirstHolster") then
 		self:SetNWBool("FirstHolster", false)
 		self.Weapon:SendWeaponAnim(ACT_VM_HOLSTER)
@@ -216,8 +240,8 @@ function SWEP:Holster(wep)
 		self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
 		function() 
-			if SERVER and IsValid(self.Owner) and IsValid(wep) then
-				self.Owner:SelectWeapon(wep)
+			if IsValid(self.Owner) and IsValid(wep) and IsValid(self.Weapon) then
+				if SERVER then self.Owner:SelectWeapon(wep) end
 			end
 		end)
 		return false
@@ -228,7 +252,9 @@ function SWEP:Holster(wep)
 end
 
 function SWEP:CanPrimaryAttack()
-	if (self.Weapon:Clip1() <= 0) or CurTime() < self:GetNWFloat("InReload") or CurTime() < self:GetNWFloat("InHolster") or CurTime() < self:GetNWFloat("InDeploy") then
+	if self:GetNWBool("UnderBarrel") then
+		self:SpecialAttack()
+	elseif (self.Weapon:Clip1() <= 0) or CurTime() < self:GetNWFloat("InReload") or CurTime() < self:GetNWFloat("InHolster") or CurTime() < self:GetNWFloat("InDeploy") then
 		self.Weapon:StopSound(self.Primary.Sound)
 		return false
 	else
@@ -236,16 +262,9 @@ function SWEP:CanPrimaryAttack()
 	end
 end
 
-/*---------------------------------------------------------
-PrimaryAttack
-
-- Shooting things handled here; anim, sound, ammo, etc.
----------------------------------------------------------*/
-function SWEP:PrimaryAttack()
-
-	if !self:CanPrimaryAttack() then return end
-
-	if self:GetNWBool("UnderBarrel") then
+// Underbarrel attacks
+function SWEP:SpecialAttack()
+	if self.UnderLauncher then
 		if !self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 and IsFirstTimePredicted() then // If we don't need a reload
 			self:SetNWBool("UnderReload", true) // We need a reload
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
@@ -258,30 +277,55 @@ function SWEP:PrimaryAttack()
 			self:SetNextPrimaryFire( CurTime() + 1 )
 			return
 		end
-	else
-		// Animate!
-		if self:GetNWBool("InIron") then
-			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
+	elseif self.UnderKey then
+		if CurTime() < self:GetNWFloat("InReload") then return end
+		if self:GetNWInt("UnderMag") > 0 and self:Ammo2() > 0 then
+			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
+			self.Weapon:EmitSound("Weapon_HFGL.Single")
+			self:ShootBullet(math.Rand(20,30), 12, 0.1)
+			self:SetNextPrimaryFire( CurTime() + 1 )
+			self.Weapon:TakeSecondaryAmmo(1)
+			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
 		else
-			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+			print(self:GetNWInt("UnderMag"))
+			self:EmitSound( "Weapon_Pistol.Empty" )
+			self:SetNextPrimaryFire( CurTime() + 1 )
+			return
 		end
-		
-		// Shoot!
-		self:ShootBullet(math.Rand(20,30), 1, 0) 	-- damage, numbullets, cone
-		self.Weapon:TakePrimaryAmmo(1)
-		
-		if !self.Rifle then
-			self.Weapon:EmitSound(self.Primary.Sound)
-		else
-			if self.Weapon:Clip1() <= 0 then
-				self.Weapon:StopSound(self.Primary.Sound)
-				self.Weapon:EmitSound(self.Primary.SoundEnd)
-			end
-		end
-		
-		self:ShootFX()
-		self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 	end
+end
+
+/*---------------------------------------------------------
+PrimaryAttack
+
+- Shooting things handled here; anim, sound, ammo, etc.
+---------------------------------------------------------*/
+function SWEP:PrimaryAttack()
+
+	if !self:CanPrimaryAttack() then return end
+
+	// Animate!
+	if self:GetNWBool("InIron") then
+		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
+	else
+		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	end
+	
+	// Shoot!
+	self:ShootBullet(math.Rand(20,30), 1, 0) 	-- damage, numbullets, cone
+	self.Weapon:TakePrimaryAmmo(1)
+	
+	if !self.Rifle then
+		self.Weapon:EmitSound(self.Primary.Sound)
+	else
+		if self.Weapon:Clip1() <= 0 then
+			self.Weapon:StopSound(self.Primary.Sound)
+			self.Weapon:EmitSound(self.Primary.SoundEnd)
+		end
+	end
+	
+	self:ShootFX()
+	self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 
 end
 
@@ -428,23 +472,66 @@ but hey, it works.
 ---------------------------------------------------------*/
 function SWEP:Reload()
 	
-	// Returns
-	if self.Owner:KeyDown(IN_USE) or ( self.Weapon:Clip1() >= self.Primary.ClipSize and !self:GetNWBool("UnderBarrel") ) or CurTime() < self:GetNWFloat("InReload")  then return end
+	/*
+	//
+	// m4 key
+	//
 
-	if self:GetNWBool("UnderBarrel") then
-		if self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 then // If we need a reload and have ammo
-			self.Weapon:SendWeaponAnim(ACT_VM_RELOAD_DEPLOYED)
-				self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
-			function() // We don't have to reload anymore ~once we're done reloading~. Duh.
-				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
-					self:SetNWBool("UnderReload", false)
-				end
-			end)	
+	Under Draw:  ACT_VM_DEPLOY_3
+	under fire: ACT_VM_PRIMARYATTACK_3
+
+	insert shell: ACT_SHOTGUN_PUMP
+	under reload tact: ACT_SHOTGUN_RELOAD_FINISH
+	reload start: ACT_SHOTGUN_RELOAD_START
+
+	*/
+
+	// Returns
+	if self.Owner:KeyDown(IN_USE) or CurTime() < self:GetNWFloat("InReload")  then return end
+
+	if self:GetNWBool("UnderBarrel") then // Underbarrel reload
+		if self.UnderLauncher then // Launcher reload
+			if self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 then // If we need a reload and have ammo
+				self.Weapon:SendWeaponAnim(ACT_VM_RELOAD_DEPLOYED)
+					self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
+				function() // We don't have to reload anymore ~once we're done reloading~. Duh.
+					if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+						self:SetNWBool("UnderReload", false)
+					end
+				end)	
+			end
+		elseif self.UnderKey then
+			if self:GetNWInt("UnderMag") < 3 then
+				local numToReload = 2 - self:GetNWInt("UnderMag")
+				self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
+					self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+					self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+				self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + 1)
+				timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
+				function()
+					self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
+						self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+						self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+						self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+					self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + numToReload)
+					timer.Simple(self.Owner:GetViewModel():SequenceDuration()*numToReload,
+					function()
+						self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
+							self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+							self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+							self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					end)
+				end)
+			end
 		end
-	else
+	else // Regular Reload
+
+		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
+
 		// Exit ironsights
 		if self:GetNWBool("InIron") then
 			self:SecondaryAttack()
@@ -474,6 +561,7 @@ function SWEP:Reload()
 				self.Weapon:DefaultReload(ACT_VM_RELOAD)
 			end
 		end
+		
 	end
 	
 end
@@ -486,37 +574,34 @@ Think
 ---------------------------------------------------------*/
 function SWEP:Think()
 
-//
-// M4 GL
-//
-/*
-Idle Snap: ACT_VM_IDLE_4
+	// M4 GL
+	/*
+	Idle Snap: ACT_VM_IDLE_4
 
-Under Draw:  ACT_VM_DEPLOY_3
-Under Holster: ACT_VM_UNDEPLOY_1
-Under Quick Holster: ACT_VM_UNDEPLOY_@
+	Under Draw:  ACT_VM_DEPLOY_3
+	Under Holster: ACT_VM_UNDEPLOY_1
+	Under Quick Holster: ACT_VM_UNDEPLOY_@
 
-Under Idle: ACT_VM_IDLE_3
+	Under Idle: ACT_VM_IDLE_3
 
-Under Fire: ACT_VM_PRIMARYATTACK_3
+	Under Fire: ACT_VM_PRIMARYATTACK_3
 
-Under Reload: ACT_VM_RELOAD_DEPLOYED
-*/
+	Under Reload: ACT_VM_RELOAD_DEPLOYED
+	*/
 
 	// Underbarrel
 	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
-		if self.UnderLauncher then
-			if CurTime() < self:GetNWFloat("InReload") then return end
-			if !self:GetNWBool("UnderBarrel") then
-				self:SetNWBool("UnderBarrel", true)
-				self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_3)
-				self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			elseif self:GetNWBool("UnderBarrel") then
-				self:SetNWBool("UnderBarrel", false)
-				self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
-			end
+		if CurTime() < self:GetNWFloat("InReload") then return end
+		if !self:GetNWBool("UnderBarrel") then
+			self:SetNWBool("UnderBarrel", true)
+			self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_3)
+			self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		elseif self:GetNWBool("UnderBarrel") then
+			self:SetNWBool("UnderBarrel", false)
+			self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
+			self:SetNWFloat("InReload", CurTime() + 0.3)
 		end
 	end
 

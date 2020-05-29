@@ -35,6 +35,10 @@ SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_9x19mm"
 
 SWEP.Rifle 				= false
+SWEP.UnderLauncher 		= false
+
+SWEP.AnimDraw 			= ACT_VM_DRAW
+SWEP.AnimDrawEmpty 		= ACT_VM_DRAW_EMPTY
 
 SWEP.Offset = {
 	Pos = 

@@ -140,7 +140,7 @@ util.PrecacheSound("Weapon_HFM4.MagIn")
 
 sound.Add({
 	name 	= "Weapon_HFGL.Single",
-	channel = CHAN_WEAPON,
+	channel = CHAN_STATIC,
 	volume 	= 1.0,
 	level = 140,
 	sound 	=  "weapons/homefront/launcher/launcher_fire.wav",

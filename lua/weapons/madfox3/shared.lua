@@ -40,8 +40,8 @@ SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "pistol"
 
 // Secondary
-SWEP.Secondary.ClipSize		= 0					// Size of a clip - We don't want a secondary clip size since this isn't actually handled
-SWEP.Secondary.DefaultClip	= 3					// Amount of ammo you spawn with
+SWEP.Secondary.ClipSize		= 0						// Size of a clip - We don't want a secondary clip size since this isn't actually handled
+SWEP.Secondary.DefaultClip	= 10					// Amount of ammo you spawn with
 SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
 SWEP.Secondary.IronFOV		= 65	// UNUSED
@@ -59,7 +59,15 @@ SWEP.EjectsShells 		= true
 SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 
+// M4
+--SWEP.Rifle = true
+--SWEP.AnimDraw = ACT_VM_DRAW
+--SWEP.AnimDrawEmpty = ACT_VM_DRAW_EMPTY
+
 SWEP.Rifle = true
+SWEP.UnderLauncher = true
+SWEP.AnimDraw 		= ACT_VM_DEPLOY
+SWEP.AnimDrawEmpty 	= ACT_VM_DEPLOY
 
 SWEP.Offset = {
 	Pos = 
@@ -180,9 +188,9 @@ function SWEP:Deploy()
 	// Draw animations
 	if self:GetNWBool("FirstDeploy") then
 		self:SetNWBool("FirstDeploy", false)
-		self.Weapon:SendWeaponAnim(ACT_VM_DRAW_EMPTY)
+		self.Weapon:SendWeaponAnim(self.AnimDrawEmpty)
 	else
-		self.Weapon:SendWeaponAnim(ACT_VM_DRAW)
+		self.Weapon:SendWeaponAnim(self.AnimDraw)
 	end
 	
 	// Setup Variables
@@ -244,7 +252,10 @@ function SWEP:PrimaryAttack()
 			self.Weapon:TakeSecondaryAmmo(1)
 			self:FireRocket("zooks_40x49_he")
 			self.Weapon:EmitSound("Weapon_HFGL.Single")
+			self:SetNextPrimaryFire( CurTime() + 1 )
 		else
+			self:EmitSound( "Weapon_Pistol.Empty" )
+			self:SetNextPrimaryFire( CurTime() + 1 )
 			return
 		end
 	else
@@ -342,13 +353,23 @@ function SWEP:ShootBullet( damage, num_bullets, aimcone )
 	bullet.Src 		= self.Owner:GetShootPos() -- Source
 	bullet.Dir 		= self.Owner:GetAimVector() -- Dir of bullet
 	bullet.Spread 	= Vector( aimcone, aimcone, 0 )	-- Aim Cone
-	bullet.Tracer	= 1 -- Show a tracer on every x bullets
+	bullet.Tracer	= 0 -- Show a tracer on every x bullets
 	bullet.Force	= (0.1*damage) -- Amount of force to give to phys objects
 	bullet.Damage	= damage
 	bullet.AmmoType = "Pistol"
 
 	self.Owner:FireBullets( bullet )
 
+end
+
+function SWEP:DoImpactEffect( tr, nDamageType )
+	if ( tr.HitSky ) then return end
+	local fx = EffectData()
+	fx:SetOrigin( tr.HitPos + tr.HitNormal )
+	fx:SetNormal( tr.HitNormal )
+	fx:SetScale(1)			// Size of explosion
+	fx:SetRadius(tr.MatType)			// Texture of Impact
+	util.Effect( "gdcw_universal_impact", fx )
 end
 
 
@@ -385,6 +406,7 @@ function SWEP:SecondaryAttack()
 	local zoom = self:GetNWFloat("PlayerFOV") - 10
 
 	if !self:GetNWBool("InIron") then
+		self:SetNWBool("UnderBarrel", false)
 		self:SetNWBool("InIron", true)
 		self.Owner:SetFOV(zoom, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2)
@@ -483,18 +505,18 @@ Under Reload: ACT_VM_RELOAD_DEPLOYED
 
 	// Underbarrel
 	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
-		if CurTime() < self:GetNWFloat("InReload") then return end
-		if !self:GetNWBool("UnderBarrel") then
-			self:SetNWBool("UnderBarrel", true)
-			self.Primary.Automatic = false
-			self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_3)
-			self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-		elseif self:GetNWBool("UnderBarrel") then
-			self.Primary.Automatic = true
-			self:SetNWBool("UnderBarrel", false)
-			self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
+		if self.UnderLauncher then
+			if CurTime() < self:GetNWFloat("InReload") then return end
+			if !self:GetNWBool("UnderBarrel") then
+				self:SetNWBool("UnderBarrel", true)
+				self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_3)
+				self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			elseif self:GetNWBool("UnderBarrel") then
+				self:SetNWBool("UnderBarrel", false)
+				self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
+			end
 		end
 	end
 

@@ -281,7 +281,7 @@ function SWEP:SpecialAttack()
 		if CurTime() < self:GetNWFloat("InReload") then return end
 		if self:GetNWInt("UnderMag") > 0 and self:Ammo2() > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
-			self.Weapon:EmitSound("Weapon_HFGL.Single")
+			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
 			self:ShootBullet(math.Rand(20,30), 12, 0.1)
 			self:SetNextPrimaryFire( CurTime() + 1 )
 			self.Weapon:TakeSecondaryAmmo(1)
@@ -504,12 +504,13 @@ function SWEP:Reload()
 				end)	
 			end
 		elseif self.UnderKey then
+			// TODO: Reload based remaining secondary ammo
 			if self:GetNWInt("UnderMag") < 3 then
 				local numToReload = 2 - self:GetNWInt("UnderMag")
 				self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-					self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
-					self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
-					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()+1)
+					self.Weapon:SetNextPrimaryFire(CurTime() + 3)
+					self.Weapon:SetNextSecondaryFire(CurTime() + 3)
+					self:SetNWFloat("InReload", CurTime() + 3)
 				self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + 1)
 				timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
 				function()

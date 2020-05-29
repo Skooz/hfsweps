@@ -173,3 +173,35 @@ sound.Add({
 	sound 	=  "weapons/homefront/launcher/m203_close.wav",
 })
 util.PrecacheSound("Weapon_HFGL.Close")
+
+//
+// Key
+//
+sound.Add({
+	name 	= "Weapon_HFMasterKey.Single",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/masterkey/masterkey_fire.wav",
+})
+util.PrecacheSound("Weapon_HFMasterKey.Single")
+
+sound.Add({
+	name 	= "Weapon_HFMasterKey.Cock",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/masterkey/masterkey_cock.wav",
+})
+util.PrecacheSound("Weapon_HFMasterKey.Cock")
+
+sound.Add({
+	name 	= "Weapon_HFMasterKey.Insert",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  {"weapons/homefront/masterkey/masterkey_insert1.wav",
+    "weapons/homefront/masterkey/masterkey_insert2.wav",
+    }
+})
+util.PrecacheSound("Weapon_HFMasterKey.Insert")

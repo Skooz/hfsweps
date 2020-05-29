@@ -238,12 +238,13 @@ function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 
 	if self:GetNWBool("UnderBarrel") then
-		if !self:GetNWBool("UnderReload") and IsFirstTimePredicted() then // If we don't need a reload
+		if !self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 and IsFirstTimePredicted() then // If we don't need a reload
 			self:SetNWBool("UnderReload", true) // We need a reload
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:TakeSecondaryAmmo(1)
-			self:FireRocket()
-		elseif self:GetNWBool("UnderReload") then
+			self:FireRocket("zooks_40x49_he")
+			self.Weapon:EmitSound("Weapon_HFGL.Single")
+		else
 			return
 		end
 	else
@@ -358,10 +359,10 @@ FireRocket
 - Rockets are entities, as are Generic Default's bullets
 - Think of GD's bullets as mini rockets
 ---------------------------------------------------------*/
-function SWEP:FireRocket() 
+function SWEP:FireRocket(round) 
 
 	if SERVER then
-		local bullet = ents.Create(self.Primary.Round)
+		local bullet = ents.Create(round)
 		if !bullet:IsValid() then return false end
 		bullet:SetAngles(self.Owner:GetAimVector():Angle()+Angle(90,0,0))
 		bullet:SetPos(self.Owner:GetShootPos())
@@ -406,13 +407,16 @@ but hey, it works.
 function SWEP:Reload()
 	
 	// Returns
-	if (self.Weapon:Clip1() >= self.Primary.ClipSize and !self:GetNWBool("UnderBarrel")) or self.Owner:KeyDown(IN_USE) then return end
+	if self.Owner:KeyDown(IN_USE) or ( self.Weapon:Clip1() >= self.Primary.ClipSize and !self:GetNWBool("UnderBarrel") ) or CurTime() < self:GetNWFloat("InReload")  then return end
 
 	if self:GetNWBool("UnderBarrel") then
-		if self:GetNWBool("UnderReload") then // If we need a reload
+		if self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 then // If we need a reload and have ammo
 			self.Weapon:SendWeaponAnim(ACT_VM_RELOAD_DEPLOYED)
+				self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
-			function() 
+			function() // We don't have to reload anymore ~once we're done reloading~. Duh.
 				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
 					self:SetNWBool("UnderReload", false)
 				end
@@ -479,10 +483,14 @@ Under Reload: ACT_VM_RELOAD_DEPLOYED
 
 	// Underbarrel
 	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
+		if CurTime() < self:GetNWFloat("InReload") then return end
 		if !self:GetNWBool("UnderBarrel") then
 			self:SetNWBool("UnderBarrel", true)
 			self.Primary.Automatic = false
 			self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_3)
+			self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		elseif self:GetNWBool("UnderBarrel") then
 			self.Primary.Automatic = true
 			self:SetNWBool("UnderBarrel", false)

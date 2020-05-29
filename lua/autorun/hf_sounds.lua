@@ -133,3 +133,43 @@ sound.Add({
     }
 })
 util.PrecacheSound("Weapon_HFM4.MagIn")
+
+//
+// GL
+//
+
+sound.Add({
+	name 	= "Weapon_HFGL.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/launcher/launcher_fire.wav",
+})
+util.PrecacheSound("Weapon_HFM4.Single")
+
+sound.Add({
+	name 	= "Weapon_HFGL.Open",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/launcher/m203_open.wav",
+})
+util.PrecacheSound("Weapon_HFGL.Open")
+
+sound.Add({
+	name 	= "Weapon_HFGL.Insert",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/launcher/m203_insert.wav",
+})
+util.PrecacheSound("Weapon_HFGL.Insert")
+
+sound.Add({
+	name 	= "Weapon_HFGL.Close",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/launcher/m203_close.wav",
+})
+util.PrecacheSound("Weapon_HFGL.Close")

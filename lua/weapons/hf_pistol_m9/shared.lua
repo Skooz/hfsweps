@@ -21,6 +21,10 @@ SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "pistol"
 
+SWEP.Secondary.ClipSize		= 0					// Size of a clip
+SWEP.Secondary.DefaultClip	= 0					// Default number of bullets in a clip
+SWEP.Secondary.Ammo			= ""
+
 // Run Position
 SWEP.RunSightsPos 			= Vector (0, 0, 0)
 SWEP.RunSightsAng 			= Vector (0, 0, 0)

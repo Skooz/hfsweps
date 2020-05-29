@@ -31,19 +31,19 @@ SWEP.Primary.SoundEnd 			= Sound("Weapon_HFM4.SingleEnd")
 SWEP.Primary.Round 			= ("")									
 SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
-SWEP.Primary.DefaultClip	= 240				// Default number of bullets in a clip
-SWEP.Primary.KickUp			= 2					// Maximum up recoil (rise)
-SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
-SWEP.Primary.KickHorizontal	= 0.2					// Maximum side recoil (koolaid)
+SWEP.Primary.DefaultClip	= 240				// Amount of ammo you spawn with
+SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
+SWEP.Primary.KickDown		= -0.5					// Maximum down recoil (skeet)
+SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
 SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "pistol"
 
 // Secondary
-SWEP.Secondary.ClipSize		= 1					// Size of a clip
-SWEP.Secondary.DefaultClip	= 3					// Default number of bullets in a clip
-SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
+SWEP.Secondary.ClipSize		= 0					// Size of a clip - We don't want a secondary clip size since this isn't actually handled
+SWEP.Secondary.DefaultClip	= 3					// Amount of ammo you spawn with
 SWEP.Secondary.Ammo			= "SMG1_Grenade"
+SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
 SWEP.Secondary.IronFOV		= 65	// UNUSED
 
 // Deprecated - Just a helper (for now) for this addon
@@ -238,9 +238,14 @@ function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 
 	if self:GetNWBool("UnderBarrel") then
-		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
-		self.Weapon:TakeSecondaryAmmo(1)
-		self:FireRocket()
+		if !self:GetNWBool("UnderReload") and IsFirstTimePredicted() then // If we don't need a reload
+			self:SetNWBool("UnderReload", true) // We need a reload
+			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
+			self.Weapon:TakeSecondaryAmmo(1)
+			self:FireRocket()
+		elseif self:GetNWBool("UnderReload") then
+			return
+		end
 	else
 		// Animate!
 		if self:GetNWBool("InIron") then
@@ -294,7 +299,7 @@ function SWEP:ShootFX()
 		anglo = Angle(math.Rand(-(self.Primary.KickDown),(self.Primary.KickUp)), math.Rand(-(self.Primary.KickHorizontal),(self.Primary.KickHorizontal)), 0)
 	end
 	-- Do recoil with angles
-	self.Owner:ViewPunch(anglo)
+	self.Owner:ViewPunch(anglo/2)
 	if (game.SinglePlayer() and SERVER) or (not game.SinglePlayer() and CLIENT) then
 		self.Owner:SetEyeAngles(self.Owner:EyeAngles() - anglo)
 	end
@@ -401,10 +406,18 @@ but hey, it works.
 function SWEP:Reload()
 	
 	// Returns
-	if self.Weapon:Clip1() >= self.Primary.ClipSize or self.Owner:KeyDown(IN_USE) then return end
+	if (self.Weapon:Clip1() >= self.Primary.ClipSize and !self:GetNWBool("UnderBarrel")) or self.Owner:KeyDown(IN_USE) then return end
 
 	if self:GetNWBool("UnderBarrel") then
-
+		if self:GetNWBool("UnderReload") then // If we need a reload
+			self.Weapon:SendWeaponAnim(ACT_VM_RELOAD_DEPLOYED)
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
+			function() 
+				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+					self:SetNWBool("UnderReload", false)
+				end
+			end)	
+		end
 	else
 		// Exit ironsights
 		if self:GetNWBool("InIron") then

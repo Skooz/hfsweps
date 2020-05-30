@@ -412,33 +412,33 @@ end
 	end
 	
 	// Glass feck
-	-- for i=0, 15*self.Scale do
-	-- 	local Debris = self.Emitter:Add( "effects/fleck_glass"..math.random(1,3), self.Pos )
-	-- 	if (Debris) then
-	-- 	Debris:SetVelocity ( self.PenVec * math.random(0,300)*self.Scale + VectorRand():GetNormalized() * 100*self.Scale )
-	-- 	Debris:SetDieTime( 60 )
-	-- 	Debris:SetStartAlpha( 255 )
-	-- 	Debris:SetEndAlpha( 0 )
-	-- 	Debris:SetStartSize( math.random(2,4*self.Scale) )
-	-- 	Debris:SetRoll( math.Rand(0, 360) )
-	-- 	Debris:SetRollDelta( math.Rand(-15, 15) )			
-	-- 	Debris:SetAirResistance( 50 ) 			 			
-	-- 	Debris:SetColor( 200,200,200 )
-	-- 	Debris:SetGravity( Vector( 0, 0, -600) ) 
-	-- 	Debris:SetCollide( true )
-	-- 	Debris:SetBounce( 0.5 )			
-	-- 	end
-	-- end
-
-	// Glass fleck
-	for i=0, 20*self.Scale do
+	for i=0, 10*self.Scale do
 		local Debris = self.Emitter:Add( "effects/fleck_glass"..math.random(1,3), self.Pos )
 		if (Debris) then
-		Debris:SetVelocity ( self.PenVec*-1 * math.random(0,500)*self.Scale + VectorRand():GetNormalized() * 100*self.Scale )
+		Debris:SetVelocity ( self.PenVec * math.random(0,300)*self.Scale + VectorRand():GetNormalized() * 100*self.Scale )
 		Debris:SetDieTime( 20 )
 		Debris:SetStartAlpha( 255 )
 		Debris:SetEndAlpha( 0 )
-		Debris:SetStartSize( math.random(2,4*self.Scale) )
+		Debris:SetStartSize( math.random(1,2*self.Scale) )
+		Debris:SetRoll( math.Rand(0, 360) )
+		Debris:SetRollDelta( math.Rand(-15, 15) )			
+		Debris:SetAirResistance( 50 ) 			 			
+		Debris:SetColor( 200,200,200 )
+		Debris:SetGravity( Vector( 0, 0, -600) ) 
+		Debris:SetCollide( true )
+		Debris:SetBounce( 0.5 )			
+		end
+	end
+
+	// Glass fleck
+	for i=0, 10*self.Scale do
+		local Debris = self.Emitter:Add( "effects/fleck_glass"..math.random(1,3), self.Pos )
+		if (Debris) then
+		Debris:SetVelocity ( self.PenVec*-1 * math.random(30,500)*self.Scale + VectorRand():GetNormalized() * 100*self.Scale )
+		Debris:SetDieTime( 20 )
+		Debris:SetStartAlpha( 255 )
+		Debris:SetEndAlpha( 0 )
+		Debris:SetStartSize( math.random(1,2*self.Scale) )
 		Debris:SetRoll( math.Rand(0, 360) )
 		Debris:SetRollDelta( math.Rand(-15, 15) )			
 		Debris:SetAirResistance( 50 ) 			 			

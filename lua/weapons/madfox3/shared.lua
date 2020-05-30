@@ -1,5 +1,5 @@
-/*---------------------------------------------------------
-~ BTB Sweps
+/*---------------------------------------------------------------------------------------
+~ Homefront SWEPs
 ~
 ~ These are mainly meant to be used in SP. MP polish is WIP.
 ~
@@ -7,7 +7,7 @@
 ~ Marlwolf 			- dude, he's kinda cute
 ~ Magenta 			- dude, she hates my soul
 ~ Generic Default 	- dude, that's a dude
----------------------------------------------------------*/
+---------------------------------------------------------------------------------------*/
 
 // Weapon Descriptions
 SWEP.Category				= "Homefront"
@@ -27,7 +27,7 @@ SWEP.AdminSpawnable			= true
 
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFM4.Single")			
-SWEP.Primary.SoundEnd 			= Sound("Weapon_HFM4.SingleEnd")		
+SWEP.Primary.SoundEnd 		= Sound("Weapon_HFM4.SingleEnd")		
 SWEP.Primary.Round 			= ("")									
 SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
@@ -46,7 +46,7 @@ SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
 SWEP.Secondary.IronFOV		= 65	// UNUSED
 
-// Deprecated - Just a helper (for now) for this addon
+// Deprecated(?)
 SWEP.IronSightsPos 			= Vector (0, 0, 0)
 SWEP.IronSightsAng 			= Vector (0, 0, 0)
 
@@ -222,7 +222,7 @@ function SWEP:Deploy()
 
 	// Setup Bodygroups
 	if self.Owner:IsPlayer() then
-		self.Owner:GetViewModel():SetBodygroup(1,1) // Hands
+		self.Owner:GetViewModel():SetBodygroup(1,2) // Hands
 		self.Owner:GetViewModel():SetBodygroup(2,1) // Sight
 		self.Owner:GetViewModel():SetBodygroup(3,1) // Frontsight
 	end
@@ -255,7 +255,7 @@ function SWEP:Holster(wep)
 
 	if !IsValid(self.Owner) or !IsValid(wep) or !IsValid(self.Weapon) then return end
 
-	if self:GetNWFloat("InReload") >= CurTime() or self:GetNWFloat("InHolster") >= CurTime() then return end
+	if self:GetNWFloat("InReload") > CurTime() or self:GetNWFloat("InHolster")-0.2 > CurTime() then return end
 
 	self.Weapon:StopSound(self.Primary.Sound)
 
@@ -283,7 +283,6 @@ function SWEP:CanPrimaryAttack()
 	if self:GetNWBool("UnderBarrel") then
 		self:SpecialAttack()
 	elseif CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then
-		print("haha")
 		return false
 	elseif self.Weapon:Clip1() <= 0 then
 		self.Weapon:StopSound(self.Primary.Sound)
@@ -315,7 +314,6 @@ function SWEP:SpecialAttack()
 		if self:GetNWInt("UnderMag") > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
-			self.Weapon:TakeSecondaryAmmo(1)
 			self:ShootBullet(14, 12, 0.1)
 			self:SetNextPrimaryFire( CurTime() + 1 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
@@ -479,7 +477,7 @@ function SWEP:SecondaryAttack()
 
 	local zoom = self:GetNWFloat("PlayerFOV") - 10
 
-	if CurTime() <= self:GetNWFloat("InReload") then return end
+	if CurTime() < self:GetNWFloat("InReload") then return end
 
 	if !self:GetNWBool("InIron") then
 		self:SetNWBool("UnderBarrel", false)
@@ -513,19 +511,19 @@ function SWEP:ReloadUnderBarrel()
 			end)	
 		end
 	elseif self.UnderKey then // Masterkey reload
-		// TODO: Reload based remaining secondary ammo
 		if self:GetNWInt("UnderMag") < 3 and self.Weapon:Ammo2() > 0 then
+			local numToReload = 3 - self:GetNWInt("UnderMag")
 			self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START) 
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + 1) // Load first shell
+			self.Weapon:TakeSecondaryAmmo(1)
+			numToReload = numToReload - 1
 			self.Weapon:SetNextPrimaryFire(CurTime() + 3)
 			self.Weapon:SetNextSecondaryFire(CurTime() + 3)
 			self:SetNWFloat("InReload", CurTime() + 3)
-			local numToReload
-			if self.Weapon:Ammo2() < 3 then 
-				numToReload = self.Weapon:Ammo2()-1
-			else
-				numToReload = 3 - self:GetNWInt("UnderMag") // How many extra times do we need to reload?
+			if numToReload > self.Weapon:Ammo2() then
+				numToReload = self.Weapon:Ammo2()
 			end
+			self.Weapon:TakeSecondaryAmmo(numToReload)
 			timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
 			function()
 				self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
@@ -582,9 +580,7 @@ function SWEP:Reload()
 					else
 						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
 					end
-					//self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-					//self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()-0.3)
 				end
 			end)
 		else // Other reloads
@@ -623,7 +619,7 @@ function SWEP:Think()
 	*/
 
 	// Underbarrel
-	if self.Rifle then
+	if self.Rifle and (self.UnderLauncher or self.UnderKey) then
 		if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
 			if CurTime() <= self:GetNWFloat("InReload") then return end
 			if !self:GetNWBool("UnderBarrel") then

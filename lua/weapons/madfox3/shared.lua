@@ -315,7 +315,8 @@ function SWEP:SpecialAttack()
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
 			self:ShootBullet(14, 12, 0.1)
-			self:SetNextPrimaryFire( CurTime() + 1 )
+			self:ShootFX()
+			self:SetNextPrimaryFire( CurTime() + 0.6 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
 		else
 			print(self:GetNWInt("UnderMag"))
@@ -389,10 +390,35 @@ function SWEP:ShootFX()
 	end
 
 	// FX  Data
+
+
 	local fx = EffectData()
+
+	// Muzzle flash
+	fx:SetEntity(self.Weapon)
+	fx:SetOrigin(self.Owner:GetShootPos())
+	fx:SetNormal(self.Owner:GetAimVector())
+	fx:SetAttachment("1")
+	util.Effect("effect_fok_flashsmoke",fx)
+
 	// Shell ejection
 	if self.EjectsShells then
-		timer.Simple(self.ShellDelay, function()
+		if self:GetNWBool("UnderBarrel") then
+			if self.UnderLauncher then return end
+			if self.UnderKey then
+				timer.Simple(0.15, 
+				function()
+					if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+						fx:SetEntity(self.Weapon)
+						fx:SetNormal(self.Owner:GetAimVector())
+						fx:SetAttachment("2")
+						util.Effect("sim_shelleject_fas_12gabuck",fx)
+					end
+				end)
+			end
+		else
+		timer.Simple(self.ShellDelay, 
+		function()
 			if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
 				fx:SetEntity(self.Weapon)
 				fx:SetNormal(self.Owner:GetAimVector())
@@ -400,13 +426,9 @@ function SWEP:ShootFX()
 				util.Effect(self.ShellEffect,fx)
 			end
 		end)
+		end
 	end
-	// Muzzle flash
-	fx:SetEntity(self.Weapon)
-	fx:SetOrigin(self.Owner:GetShootPos())
-	fx:SetNormal(self.Owner:GetAimVector())
-	fx:SetAttachment("1")
-	util.Effect("effect_fok_flashsmoke",fx)
+	
 end
 
 

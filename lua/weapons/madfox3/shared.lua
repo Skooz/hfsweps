@@ -13,8 +13,8 @@
 SWEP.Category				= "Homefront"
 SWEP.Author					= "\nZookie, Marlwolf, Magenta, Generic Default"
 SWEP.Contact				= "\nDiscord: Zookie#0210"
-SWEP.Purpose				= "BTB SWeps"
-SWEP.Instructions			= "E + R = Holster\nE + Left Mouse = Select Fire\nE + Right Mouse = Melee"
+SWEP.Purpose				= "Homefront SWEPs"
+SWEP.Instructions			= "E + R = Swap Modes.\n"
 
 // Settings
 SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4_gl.mdl")

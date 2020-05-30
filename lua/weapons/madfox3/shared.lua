@@ -290,7 +290,7 @@ function SWEP:SpecialAttack()
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
 			self.Weapon:TakeSecondaryAmmo(1)
-			self:ShootBullet(10, 12, 0.05)
+			self:ShootBullet(14, 12, 0.1)
 			self:SetNextPrimaryFire( CurTime() + 1 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
 		else
@@ -470,35 +470,9 @@ function SWEP:SecondaryAttack()
 end
 
 
-/*---------------------------------------------------------
-Reload
+function SWEP:ReloadUnderBarrel()
 
-- Called when the reload button is pressed
-- Might want a custom reload function; this is janky,
-but hey, it works.
----------------------------------------------------------*/
-function SWEP:Reload()
-	
-	/*
-	//
-	// m4 key
-	//
-
-	Under Draw:  ACT_VM_DEPLOY_3
-	under fire: ACT_VM_PRIMARYATTACK_3
-
-	insert shell: ACT_SHOTGUN_PUMP
-	under reload tact: ACT_SHOTGUN_RELOAD_FINISH
-	reload start: ACT_SHOTGUN_RELOAD_START
-
-	*/
-
-	// Returns
-	if self.Owner:KeyDown(IN_USE) or CurTime() < self:GetNWFloat("InReload")  then return end
-
-	//Underbarrel reloads
-	if self:GetNWBool("UnderBarrel") then // Launcher reload
-		if self.UnderLauncher then // Launcher reload
+	if self.UnderLauncher then // Launcher reload
 			if self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 then // If we need a reload and have ammo
 				self.Weapon:SendWeaponAnim(ACT_VM_RELOAD_DEPLOYED)
 					self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
@@ -542,6 +516,24 @@ function SWEP:Reload()
 				end)
 			end
 		end
+
+end
+
+/*---------------------------------------------------------
+Reload
+
+- Called when the reload button is pressed
+- Might want a custom reload function; this is janky,
+but hey, it works.
+---------------------------------------------------------*/
+function SWEP:Reload()
+
+	// Returns
+	if self.Owner:KeyDown(IN_USE) or CurTime() < self:GetNWFloat("InReload")  then return end
+
+	//Underbarrel reloads
+	if self:GetNWBool("UnderBarrel") then // Launcher reload
+		self:ReloadUnderBarrel()
 	else // Regular Reload
 		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
 		// Exit ironsights

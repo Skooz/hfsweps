@@ -100,6 +100,7 @@ sound.Add({
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
 	level = 90,
+    pitch = { 85, 115 },
 	sound 	=  {"weapons/homefront/m4/m4_handtowpn.wav","weapons/homefront/m4/m4_handtowpn2.wav"}
 })
 util.PrecacheSound("Weapon_HFM4.HandOnWeapon")
@@ -135,9 +136,30 @@ sound.Add({
 util.PrecacheSound("Weapon_HFM4.MagIn")
 
 //
+// M16
+//
+sound.Add({
+	name 	= "Weapon_HFM16.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+    pitch = { 97, 103 },
+	sound 	=  "weapons/homefront/m16/m16_fire.wav",
+})
+util.PrecacheSound("Weapon_HF16.Single")
+
+sound.Add({
+	name 	= "Weapon_HFM16.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m16/m16_magin.wav",
+})
+util.PrecacheSound("Weapon_HF16.MagIn")
+
+//
 // GL
 //
-
 sound.Add({
 	name 	= "Weapon_HFGL.Single",
 	channel = CHAN_STATIC,
@@ -184,6 +206,7 @@ sound.Add({
 	level = 140,
 	sound 	=  "weapons/homefront/masterkey/masterkey_fire.wav",
 })
+
 util.PrecacheSound("Weapon_HFMasterKey.Single")
 
 sound.Add({
@@ -205,3 +228,263 @@ sound.Add({
     }
 })
 util.PrecacheSound("Weapon_HFMasterKey.Insert")
+
+//
+// ACR
+//
+sound.Add({
+	name 	= "Weapon_HFACR.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFACR.Single")
+
+sound.Add({
+	name 	= "Weapon_HFACR.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFMACR.SingleEnd")
+
+sound.Add({
+	name 	= "Weapon_HFACR.BoltBack",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  {"weapons/homefront/m200/m200_bolt_1.wav",
+    "weapons/homefront/m200/m200_bolt_2.wav",
+    "weapons/homefront/m200/m200_bolt_3.wav",
+    "weapons/homefront/m200/m200_bolt_4.wav",
+    }
+})
+util.PrecacheSound("Weapon_HFACR.BoltBack")
+
+sound.Add({
+	name 	= "Weapon_HFACR.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/acr/acr_magout.wav"
+})
+util.PrecacheSound("Weapon_HFACR.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFACR.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/acr/acr_magin.wav"
+})
+util.PrecacheSound("Weapon_HFACR.MagIn")
+
+
+//
+// SCAR
+//
+sound.Add({
+	name 	= "Weapon_HFScar.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+    pitch = { 95, 105 },
+	sound 	=  "weapons/homefront/scar/scar_fire.wav" 
+})
+util.PrecacheSound("Weapon_HFScar.Single")
+
+sound.Add({
+	name 	= "Weapon_HFScar.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/scar/scar_magout.wav"
+})
+util.PrecacheSound("Weapon_HFScar.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFScar.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/scar/scar_magin.wav"
+})
+util.PrecacheSound("Weapon_HFScar.MagIn")
+
+//
+// ACR
+//
+sound.Add({
+	name 	= "Weapon_HFT3AK.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/t3ak/t3ak_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFACR.Single")
+
+sound.Add({
+	name 	= "Weapon_HFT3AK.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFT3AK.SingleEnd")
+
+sound.Add({
+	name 	= "Weapon_HFT3AK.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/t3ak/t3ak_magin.wav"
+})
+util.PrecacheSound("Weapon_HFT3AK.MagIn")
+
+sound.Add({
+	name 	= "Weapon_HFT3AK.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/t3ak/t3ak_magout.wav"
+})
+util.PrecacheSound("Weapon_HFT3AK.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFT3AK.BoltDoubleBack",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/t3ak/t3ak_boltdback.wav"
+})
+util.PrecacheSound("Weapon_HFT3AK.BoltDoubleBack")
+
+
+//
+// XM10
+//
+sound.Add({
+	name 	= "Weapon_HFXM10.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/xm10/xm10_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFACR.Single")
+
+sound.Add({
+	name 	= "Weapon_HFXM10.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFXM10.SingleEnd")
+
+sound.Add({
+	name 	= "Weapon_HFXM10.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/xm10/xm10_magout.wav"
+})
+util.PrecacheSound("Weapon_HFXM10.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFXM10.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/xm10/xm10_magin.wav"
+})
+util.PrecacheSound("Weapon_HFXM10.MagIn")
+
+// 
+// Diablo
+// 
+
+sound.Add({
+	name 	= "Weapon_HFDiablo.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/diablo/diablo_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFACR.Single")
+
+sound.Add({
+	name 	= "Weapon_HFDiablo.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFACR.Single")
+
+sound.Add({
+	name 	= "Weapon_HFDiablo.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/diablo/diablo_magin.wav"
+})
+util.PrecacheSound("Weapon_HFDiablo.MagIn")
+
+sound.Add({
+	name 	= "Weapon_HFDiablo.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/diablo/diablo_magout.wav"
+})
+util.PrecacheSound("Weapon_HFDiablo.MagOut")
+
+//
+// Kriss
+//
+sound.Add({
+	name 	= "Weapon_HFKriss.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/kriss/kriss_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFKriss.Single")
+
+sound.Add({
+	name 	= "Weapon_HFKriss.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFKriss.Single")
+
+sound.Add({
+	name 	= "Weapon_HFKriss.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/kriss/kriss_magout.wav"
+})
+util.PrecacheSound("Weapon_HFKriss.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFKriss.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/kriss/kriss_magin.wav"
+})
+util.PrecacheSound("Weapon_HFKriss.MagIn")
+
+sound.Add({
+	name 	= "Weapon_HFKriss.MagLock",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/kriss/kriss_maglock.wav"
+})
+util.PrecacheSound("Weapon_HFKriss.MagLock")

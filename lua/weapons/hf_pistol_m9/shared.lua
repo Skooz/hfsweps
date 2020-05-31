@@ -9,7 +9,8 @@ SWEP.AdminSpawnable			= true
 
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFM9.Single")				
-SWEP.Primary.Round 			= ("")									
+SWEP.Primary.Round 			= ("")		
+SWEP.Primary.Damage			= 20							
 SWEP.Primary.RPM			= 1100					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 12				// Size of a clip
 SWEP.Primary.DefaultClip	= 120				// Default number of bullets in a clip
@@ -32,11 +33,16 @@ SWEP.EjectsShells 		= true
 SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_9x19mm"
 
-SWEP.Rifle 			= false
+// M9
+SWEP.Burst			= false
+SWEP.BranchReload 	= false
 SWEP.UnderLauncher 	= false
 SWEP.UnderKey		= false
+
 SWEP.AnimDraw 		= ACT_VM_DRAW
 SWEP.AnimDrawEmpty 	= ACT_VM_DRAW_EMPTY
+SWEP.AnimReload			= ACT_VM_RELOAD
+SWEP.AnimReloadEmpty	= ACT_VM_RELOAD_EMPTY
 
 SWEP.Offset = {
 	Pos = 

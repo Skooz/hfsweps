@@ -11,7 +11,8 @@ SWEP.AdminSpawnable			= true
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFM4.Single")
 SWEP.Primary.SoundEnd 		= Sound("Weapon_HFM4.SingleEnd")					
-SWEP.Primary.Round 			= ("")									
+SWEP.Primary.Round 			= ("")		
+SWEP.Primary.Damage			= 20							
 SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
@@ -37,7 +38,8 @@ SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 
 // M4
-SWEP.Rifle 			= true
+SWEP.Burst			= false
+SWEP.BranchReload 	= true
 SWEP.UnderLauncher 	= false
 SWEP.UnderKey		= false
 SWEP.AnimDraw 		= ACT_VM_DRAW

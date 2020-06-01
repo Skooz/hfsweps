@@ -3,36 +3,35 @@ SWEP.Base = "madfox3"
 
 // Settings
 SWEP.Category				= "Homefront"
-SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m4_gl.mdl")
-SWEP.WorldModel				= Model("models/weapons/homefront/w_rifle_m4.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_rifle_m16_gl.mdl")
+SWEP.WorldModel				= Model("models/weapons/homefront/w_rifle_m16.mdl")
 SWEP.Spawnable				= true
 SWEP.AdminSpawnable			= true
 
 // Primary
-SWEP.Primary.Sound 			= Sound("Weapon_HFM4.Single")
-SWEP.Primary.SoundEnd 		= Sound("Weapon_HFM4.SingleEnd")					
-SWEP.Primary.Round 			= ("")			
-SWEP.Primary.Damage			= 12						
+SWEP.Primary.Sound 			= Sound("Weapon_HFM16.Single")
+SWEP.Primary.SoundEnd 		= Sound("")					
+SWEP.Primary.Damage			= 12							
 SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
 
-SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
+SWEP.Primary.KickUp			= 1.5					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 0.5					// Maximum side recoil (koolaid)
 
-SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
+SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "ar2"			// What kind of ammo
 SWEP.HoldType 				= "ar2"
 
 SWEP.Secondary.DefaultClip	= 3					// Default number of bullets in a clip
 SWEP.Secondary.Ammo			= "SMG1_Grenade"
 
-SWEP.Secondary.Zoom			= 0.85	
+SWEP.Secondary.Zoom			= 0.66	
 
 // Adjust sight position
-SWEP.IronSightsPos 			= Vector (0, 0, 0)
-SWEP.IronSightsAng 			= Vector (-0.35, 0, 0)
+SWEP.IronSightsPos 			= Vector (0, 5, 0)
+SWEP.IronSightsAng 			= Vector (-0.12, 0.02, 0)
 
 // Run Position
 SWEP.RunSightsPos 			= Vector (0, 0, 0)
@@ -43,14 +42,13 @@ SWEP.EjectsShells 		= true
 SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 
-// M4 GL
+// M16 GL
 SWEP.Burst			= false
 SWEP.BranchReload 	= true
 SWEP.UnderLauncher 	= true
 SWEP.UnderKey		= false
-SWEP.AnimDraw 		= ACT_VM_DEPLOY
-SWEP.AnimDrawEmpty 	= ACT_VM_DEPLOY
-
+SWEP.AnimDraw 		= ACT_VM_DRAW
+SWEP.AnimDrawEmpty 	= ACT_VM_DRAW
 
 SWEP.Offset = {
 	Pos = 

@@ -24,6 +24,13 @@ SWEP.HoldType 				= "pistol"
 SWEP.Secondary.DefaultClip	= 0					// Default number of bullets in a clip
 SWEP.Secondary.Ammo			= ""
 
+SWEP.Secondary.Zoom			= 0.9
+
+// Adjust sight position
+SWEP.IronSightsPos 			= Vector (0, 0, 0)
+SWEP.IronSightsAng 			= Vector (-0.1, 0.06, 0)
+
+
 // Run Position
 SWEP.RunSightsPos 			= Vector (0, 0, 0)
 SWEP.RunSightsAng 			= Vector (0, 0, 0)

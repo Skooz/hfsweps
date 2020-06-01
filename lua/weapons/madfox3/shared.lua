@@ -17,8 +17,8 @@ SWEP.Purpose				= "Homefront SWEPs"
 SWEP.Instructions			= "E + R = Swap Modes.\n"
 
 // Settings
-SWEP.ViewModel				= Model("models/weapons/homefront/v_sniper_m110.mdl")
-SWEP.WorldModel				= Model("models/weapons/homefront/w_sniper_m110.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_sniper_m200.mdl")
+SWEP.WorldModel				= Model("models/weapons/homefront/w_sniper_m200.mdl")
 SWEP.ViewModelFOV			= 50		
 SWEP.ViewModelFlip			= false		
 SWEP.DrawCrosshair			= true	
@@ -41,12 +41,13 @@ SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "ar2"
 
 // Secondary
+SWEP.Secondary.Zoom			= 0.9	
 SWEP.Secondary.ClipSize		= 0						// Size of a clip - We don't want a secondary clip size since this isn't actually handled
 SWEP.Secondary.DefaultClip	= 10					// Amount of ammo you spawn with
 SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
 
-// Deprecated(?)
+// Adjust sight position
 SWEP.IronSightsPos 			= Vector (4, -80, 0)
 SWEP.IronSightsAng 			= Vector (0, 0, 0)
 
@@ -60,7 +61,6 @@ SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 
 // Snipers
-SWEP.Secondary.Zoom				= 80 // This needs to become a percentage based value
 SWEP.Secondary.UseACOG			= false	
 SWEP.Secondary.UseMilDot		= false		
 SWEP.Secondary.UseSVD			= false	
@@ -72,34 +72,10 @@ SWEP.Secondary.UseRangefinder	= true
 SWEP.data 						= {}
 SWEP.data.ironsights			= 1
 
-SWEP.ScopeScale 				= 0.5
-SWEP.ReticleScale 				= 0.5
+SWEP.ScopeScale 				= 1
+SWEP.ReticleScale 				= 1
 SWEP.Velocity					= 850
 
-
-// M16
--- SWEP.Burst			= false
--- SWEP.BranchReload 	= true
--- SWEP.UnderLauncher 	= false
--- SWEP.UnderKey		= false
--- SWEP.AnimDraw 		= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW
-
-// M16 GL
--- SWEP.Burst			= false
--- SWEP.BranchReload 	= true
--- SWEP.UnderLauncher 	= true
--- SWEP.UnderKey		= false
--- SWEP.AnimDraw 		= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW
-
-// M16 Key
--- SWEP.Burst			= false
--- SWEP.BranchReload 	= true
--- SWEP.UnderLauncher 	= false
--- SWEP.UnderKey		= true
--- SWEP.AnimDraw 		= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW
 
 // ACR
 -- SWEP.Burst			= false
@@ -108,7 +84,7 @@ SWEP.Velocity					= 850
 -- SWEP.UnderKey		= false
 -- SWEP.AnimDraw 		= ACT_VM_DRAW
 -- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW_EMPTY
--- SWEP.AnimReload			= ACT_VM_RELOAD
+-- SWEP.AnimReload		= ACT_VM_RELOAD
 -- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
 // ACR GL
@@ -118,7 +94,7 @@ SWEP.Velocity					= 850
 -- SWEP.UnderKey		= false
 -- SWEP.AnimDraw 		= ACT_VM_DRAW
 -- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW_EMPTY
--- SWEP.AnimReload			= ACT_VM_RELOAD
+-- SWEP.AnimReload		= ACT_VM_RELOAD
 -- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
 // SCAR
@@ -137,7 +113,7 @@ SWEP.Velocity					= 850
 -- SWEP.AnimDraw 			= ACT_VM_DRAW
 -- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW // no empty on gl or key
 -- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty		= ACT_VM_RELOAD
 
 // XM10
 -- SWEP.Burst				= false
@@ -147,10 +123,10 @@ SWEP.Velocity					= 850
 -- SWEP.AnimDraw 			= ACT_VM_DRAW
 -- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
 -- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty		= ACT_VM_RELOAD
 
 // 870
--- SWEP.Shotgun = true
+-- SWEP.Shotgun 			= true
 -- SWEP.Burst				= false
 -- SWEP.BranchReload 		= false
 -- SWEP.UnderLauncher 		= false
@@ -158,7 +134,7 @@ SWEP.Velocity					= 850
 -- SWEP.AnimDraw 			= ACT_VM_DRAW
 -- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
 -- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty		= ACT_VM_RELOAD
 
 // Diablo
 -- SWEP.Shotgun 			= false 
@@ -205,10 +181,23 @@ SWEP.Velocity					= 850
 -- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
 // M110
-SWEP.Sniper = true
+-- SWEP.Sniper				= false
+-- SWEP.Shotgun 			= false 
+-- SWEP.Burst				= false
+-- SWEP.BranchReload 		= true
+-- SWEP.UnderLauncher 		= false
+-- SWEP.UnderKey			= false
+-- SWEP.AnimDraw 			= ACT_VM_DRAW
+-- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
+-- SWEP.AnimReload			= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+
+// M200
+// delay attacks
+SWEP.Sniper				= false
 SWEP.Shotgun 			= false 
 SWEP.Burst				= false
-SWEP.BranchReload 		= true
+SWEP.BranchReload 		= false
 SWEP.UnderLauncher 		= false
 SWEP.UnderKey			= false
 SWEP.AnimDraw 			= ACT_VM_DRAW
@@ -307,12 +296,11 @@ Initialize
 ---------------------------------------------------------*/
 function SWEP:Initialize()
 
-	if CLIENT then
+	if CLIENT and self.Sniper then
 		-- We need to get these so we can scale everything to the player's current resolution.
 		local iScreenWidth = surface.ScreenWidth()
 		local iScreenHeight = surface.ScreenHeight()
 	
-		-- The following code is only slightly riped off from Night Eagle
 		-- These tables are used to draw things like scopes and crosshairs to the HUD
 		self.ScopeTable = {}
 		self.ScopeTable.l = iScreenHeight*self.ScopeScale
@@ -324,7 +312,7 @@ function SWEP:Initialize()
 		self.ScopeTable.y3 = self.ScopeTable.y2
 		self.ScopeTable.x4 = self.ScopeTable.x3
 		self.ScopeTable.y4 = self.ScopeTable.y1
-		self.ScopeTable.l = (iScreenHeight + 1)*self.ScopeScale -- I don't know why this works, but it does.
+		self.ScopeTable.l = (iScreenHeight + 1)*self.ScopeScale
 
 		self.QuadTable = {}
 		self.QuadTable.x1 = 0
@@ -570,8 +558,7 @@ end
 /*---------------------------------------------------------
 SpecialAttack
 
-- Called in PrimaryAttack
-- Handles various effects; muzzle flash and bullet shells
+- This function handles 
 ---------------------------------------------------------*/
 function SWEP:SpecialAttack()
 	if self.UnderLauncher then
@@ -592,7 +579,7 @@ function SWEP:SpecialAttack()
 		if self:GetNWInt("UnderMag") > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
-			self:ShootBullet(18, 12, 0.1)
+			self:ShootBullet(10, 12, 0.1)
 			self:ShootFX()
 			self:SetNextPrimaryFire( CurTime() + 0.6 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
@@ -752,25 +739,21 @@ function SWEP:SecondaryAttack()
 
 	if CurTime() < self:GetNWFloat("InReload") then return end
 
-	local zoom = self:GetNWFloat("PlayerFOV") - self.Secondary.Zoom
+	local zoom = self:GetNWFloat("PlayerFOV") * self.Secondary.Zoom
 
 	if !self:GetNWBool("InIron") then
 		self:SetNWBool("UnderBarrel", false)
 		self:SetNWBool("InIron", true)
-		self.Owner:CrosshairDisable()
+		//self.Owner:CrosshairDisable()
 		self.Owner:SetFOV(zoom, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2)
-		if self.Sniper then
-			self:SetIronsights(true, self.Owner)
-		end
+		self:SetIronsights(true, self.Owner)
 	elseif self:GetNWBool("InIron") then
 		self:SetNWBool("InIron", false)
-		self.Owner:CrosshairEnable()
+		//self.Owner:CrosshairEnable()
 		self.Owner:SetFOV(0, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
-		if self.Sniper then
-			self:SetIronsights(false, self.Owner)
-		end
+		self:SetIronsights(false, self.Owner)
 	end
 
 end
@@ -874,7 +857,7 @@ AdjustMouseSensitivity
 ---------------------------------------------------------*/
 function SWEP:AdjustMouseSensitivity()
 	if self:GetNWBool("InIron") and self.Sniper then
-		return ( (self:GetNWFloat("PlayerFOV")-self.Secondary.Zoom) / self:GetNWFloat("PlayerFOV") )
+		return self.Secondary.Zoom 
 	else 
 		return 1
 	end
@@ -1056,8 +1039,8 @@ function SWEP:Think()
 
 	// Sway values
 	if self:GetNWBool("InIron") then
-		self.SwayScale = 0.2
-		self.BobScale = 0.1
+		self.SwayScale = 0.1
+		self.BobScale = 0.075
 	else
 		self.SwayScale 	= 1
 		self.BobScale 	= 1
@@ -1071,7 +1054,7 @@ GetViewModelPosition
 
 - Manipulate viewmodel position
 ---------------------------------------------------------*/
-local IRONSIGHT_TIME = 0.3
+local IRONSIGHT_TIME = 0.05
 
 function SWEP:GetViewModelPosition(pos, ang)
 

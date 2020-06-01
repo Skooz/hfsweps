@@ -641,3 +641,71 @@ sound.Add({
 	sound 	=  "weapons/homefront/m110/m110_magin.wav" 
 })
 util.PrecacheSound("Weapon_HFM110.MagIn")
+
+//
+// M200
+//
+
+sound.Add({
+	name 	= "Weapon_HFM200.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+    pitch = { 95, 105 },
+	sound 	=  "weapons/homefront/m200/m200_fire.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.Single")
+
+sound.Add({
+	name 	= "Weapon_HFM200.Bolt1",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m200/m200_bolt_1.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.Bolt1")
+
+sound.Add({
+	name 	= "Weapon_HFM200.Bolt2",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m200/m200_bolt_2.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.Bolt2")
+
+sound.Add({
+	name 	= "Weapon_HFM200.Bolt3",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m200/m200_bolt_3.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.Bolt3")
+
+sound.Add({
+	name 	= "Weapon_HFM200.Bolt4",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m200/m200_bolt_4.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.Bolt4")
+
+sound.Add({
+	name 	= "Weapon_HFM200.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m200/m200_magout.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFM200.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m200/m200_magin.wav" 
+})
+util.PrecacheSound("Weapon_HFM200.MagIn")

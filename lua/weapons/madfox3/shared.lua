@@ -29,7 +29,7 @@ SWEP.AdminSpawnable			= true
 SWEP.Primary.Sound 			= Sound("Weapon_HFKriss.Single")			
 SWEP.Primary.SoundEnd 		= Sound("Weapon_HFKriss.SingleEnd")		
 SWEP.Primary.Round 			= ("")								
-SWEP.Primary.Damage			= 25
+SWEP.Primary.Damage			= 12
 SWEP.Primary.RPM			= 1100					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 120				// Amount of ammo you spawn with
@@ -155,13 +155,24 @@ SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 -- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
 // Kriss
+-- SWEP.Shotgun 			= false 
+-- SWEP.Burst				= false
+-- SWEP.BranchReload 		= true
+-- SWEP.UnderLauncher 		= false
+-- SWEP.UnderKey			= false
+-- SWEP.AnimDraw 			= ACT_VM_DRAW
+-- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
+-- SWEP.AnimReload			= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+
+// Scar LMG
 SWEP.Shotgun 			= false 
 SWEP.Burst				= false
 SWEP.BranchReload 		= true
 SWEP.UnderLauncher 		= false
 SWEP.UnderKey			= false
 SWEP.AnimDraw 			= ACT_VM_DRAW
-SWEP.AnimDrawEmpty 		= ACT_VM_DRAW_EMPTY
+SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
 SWEP.AnimReload			= ACT_VM_RELOAD
 SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
@@ -482,7 +493,7 @@ function SWEP:SpecialAttack()
 		if self:GetNWInt("UnderMag") > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
-			self:ShootBullet(18, 12, 0.15)
+			self:ShootBullet(18, 12, 0.1)
 			self:ShootFX()
 			self:SetNextPrimaryFire( CurTime() + 0.6 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)

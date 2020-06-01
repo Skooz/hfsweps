@@ -404,7 +404,6 @@ util.PrecacheSound("Weapon_HFXM10.MagIn")
 // 
 // Diablo
 // 
-
 sound.Add({
 	name 	= "Weapon_HFDiablo.Single",
 	channel = CHAN_WEAPON,
@@ -488,3 +487,157 @@ sound.Add({
 	sound 	=  "weapons/homefront/kriss/kriss_maglock.wav"
 })
 util.PrecacheSound("Weapon_HFKriss.MagLock")
+
+//
+// Scar LMG
+//
+sound.Add({
+	name 	= "Weapon_HFScarL.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/scarl/scarl_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFScarL.Single")
+
+sound.Add({
+	name 	= "Weapon_HFScarL.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFScarL.SingleEnd")
+
+sound.Add({
+	name 	= "Weapon_HFScarL.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/scarl/scarl_magout.wav"
+})
+util.PrecacheSound("Weapon_HFScarL.MagOut")
+
+sound.Add({
+	name 	= "Weapon_HFScarL.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/scarl/scarl_magin.wav"
+})
+util.PrecacheSound("Weapon_HFScarL.MagIn")
+
+//
+// M249
+//
+sound.Add({
+	name 	= "Weapon_HFM249.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/m249/m249_fireloop.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Single")
+
+sound.Add({
+	name 	= "Weapon_HFM249.SingleEnd",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+	sound 	=  "weapons/homefront/acr/acr_firestart.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.SingleEnd")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload1",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_1.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload1")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload2",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_2.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload2")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload3",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_3.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload3")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload4",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_4.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload4")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload5",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_5.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload5")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload6",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_6.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload6")
+
+sound.Add({
+	name 	= "Weapon_HFM249.Reload7",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m249/m249_reload_7.wav" 
+})
+util.PrecacheSound("Weapon_HFM249.Reload7")
+
+//
+// M110
+//
+sound.Add({
+	name 	= "Weapon_HFM110.Single",
+	channel = CHAN_WEAPON,
+	volume 	= 1.0,
+	level = 140,
+    pitch = { 95, 105 },
+	sound 	=  "weapons/homefront/m110/m110_fire.wav" 
+})
+util.PrecacheSound("Weapon_HFM110.Single")
+
+sound.Add({
+	name 	= "Weapon_HFM110.MagOut",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m110/m110_magout.wav" 
+})
+util.PrecacheSound("Weapon_HFM110.Single")
+
+sound.Add({
+	name 	= "Weapon_HFM110.MagIn",
+	channel = CHAN_STATIC,
+	volume 	= 1.0,
+	level = 90,
+	sound 	=  "weapons/homefront/m110/m110_magin.wav" 
+})
+util.PrecacheSound("Weapon_HFM110.MagIn")

@@ -17,8 +17,8 @@ SWEP.Purpose				= "Homefront SWEPs"
 SWEP.Instructions			= "E + R = Swap Modes.\n"
 
 // Settings
-SWEP.ViewModel				= Model("models/weapons/homefront/v_smg_kriss.mdl")
-SWEP.WorldModel				= Model("models/weapons/homefront/w_smg_kriss.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_sniper_m110.mdl")
+SWEP.WorldModel				= Model("models/weapons/homefront/w_sniper_m110.mdl")
 SWEP.ViewModelFOV			= 50		
 SWEP.ViewModelFlip			= false		
 SWEP.DrawCrosshair			= true	
@@ -26,7 +26,7 @@ SWEP.Spawnable				= true
 SWEP.AdminSpawnable			= true
 
 // Primary
-SWEP.Primary.Sound 			= Sound("Weapon_HFKriss.Single")			
+SWEP.Primary.Sound 			= Sound("Weapon_HFM110.Single")			
 SWEP.Primary.SoundEnd 		= Sound("Weapon_HFKriss.SingleEnd")		
 SWEP.Primary.Round 			= ("")								
 SWEP.Primary.Damage			= 12
@@ -36,7 +36,7 @@ SWEP.Primary.DefaultClip	= 120				// Amount of ammo you spawn with
 SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
-SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
+SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "pistol"			// What kind of ammo
 SWEP.HoldType 				= "ar2"
 
@@ -45,10 +45,9 @@ SWEP.Secondary.ClipSize		= 0						// Size of a clip - We don't want a secondary 
 SWEP.Secondary.DefaultClip	= 10					// Amount of ammo you spawn with
 SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
-SWEP.Secondary.IronFOV		= 65	// UNUSED
 
 // Deprecated(?)
-SWEP.IronSightsPos 			= Vector (0, 0, 0)
+SWEP.IronSightsPos 			= Vector (4, -80, 0)
 SWEP.IronSightsAng 			= Vector (0, 0, 0)
 
 // Run Position
@@ -59,6 +58,24 @@ SWEP.RunSightsAng 			= Vector (0, 0, 0)
 SWEP.EjectsShells 		= true
 SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
+
+// Snipers
+SWEP.Secondary.Zoom				= 80 // This needs to become a percentage based value
+SWEP.Secondary.UseACOG			= false	
+SWEP.Secondary.UseMilDot		= false		
+SWEP.Secondary.UseSVD			= false	
+SWEP.Secondary.UseParabolic		= true	
+SWEP.Secondary.UseElcan			= false
+SWEP.Secondary.UseGreenDuplex	= false	
+SWEP.Secondary.UseRangefinder	= true	
+
+SWEP.data 						= {}
+SWEP.data.ironsights			= 1
+
+SWEP.ScopeScale 				= 0.5
+SWEP.ReticleScale 				= 0.5
+SWEP.Velocity					= 850
+
 
 // M16
 -- SWEP.Burst			= false
@@ -166,6 +183,29 @@ SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 -- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
 // Scar LMG
+-- SWEP.Shotgun 			= false 
+-- SWEP.Burst				= false
+-- SWEP.BranchReload 		= true
+-- SWEP.UnderLauncher 		= false
+-- SWEP.UnderKey			= false
+-- SWEP.AnimDraw 			= ACT_VM_DRAW
+-- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
+-- SWEP.AnimReload			= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+
+// M249 LMG
+-- SWEP.Shotgun 			= false 
+-- SWEP.Burst				= false
+-- SWEP.BranchReload 		= false
+-- SWEP.UnderLauncher 		= false
+-- SWEP.UnderKey			= false
+-- SWEP.AnimDraw 			= ACT_VM_DRAW
+-- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
+-- SWEP.AnimReload			= ACT_VM_RELOAD
+-- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+
+// M110
+SWEP.Sniper = true
 SWEP.Shotgun 			= false 
 SWEP.Burst				= false
 SWEP.BranchReload 		= true
@@ -264,9 +304,68 @@ reload start: ACT_SHOTGUN_RELOAD_START
 Initialize
 
 - Called before deploy
-- This function is stupid and isn't called clientside
 ---------------------------------------------------------*/
 function SWEP:Initialize()
+
+	if CLIENT then
+		-- We need to get these so we can scale everything to the player's current resolution.
+		local iScreenWidth = surface.ScreenWidth()
+		local iScreenHeight = surface.ScreenHeight()
+	
+		-- The following code is only slightly riped off from Night Eagle
+		-- These tables are used to draw things like scopes and crosshairs to the HUD
+		self.ScopeTable = {}
+		self.ScopeTable.l = iScreenHeight*self.ScopeScale
+		self.ScopeTable.x1 = 0.5*(iScreenWidth + self.ScopeTable.l)
+		self.ScopeTable.y1 = 0.5*(iScreenHeight - self.ScopeTable.l)
+		self.ScopeTable.x2 = self.ScopeTable.x1
+		self.ScopeTable.y2 = 0.5*(iScreenHeight + self.ScopeTable.l)
+		self.ScopeTable.x3 = 0.5*(iScreenWidth - self.ScopeTable.l)
+		self.ScopeTable.y3 = self.ScopeTable.y2
+		self.ScopeTable.x4 = self.ScopeTable.x3
+		self.ScopeTable.y4 = self.ScopeTable.y1
+		self.ScopeTable.l = (iScreenHeight + 1)*self.ScopeScale -- I don't know why this works, but it does.
+
+		self.QuadTable = {}
+		self.QuadTable.x1 = 0
+		self.QuadTable.y1 = 0
+		self.QuadTable.w1 = iScreenWidth
+		self.QuadTable.h1 = 0.5*iScreenHeight - self.ScopeTable.l
+		self.QuadTable.x2 = 0
+		self.QuadTable.y2 = 0.5*iScreenHeight + self.ScopeTable.l
+		self.QuadTable.w2 = self.QuadTable.w1
+		self.QuadTable.h2 = self.QuadTable.h1
+		self.QuadTable.x3 = 0
+		self.QuadTable.y3 = 0
+		self.QuadTable.w3 = 0.5*iScreenWidth - self.ScopeTable.l
+		self.QuadTable.h3 = iScreenHeight
+		self.QuadTable.x4 = 0.5*iScreenWidth + self.ScopeTable.l
+		self.QuadTable.y4 = 0
+		self.QuadTable.w4 = self.QuadTable.w3
+		self.QuadTable.h4 = self.QuadTable.h3
+
+		self.LensTable = {}
+		self.LensTable.x = self.QuadTable.w3
+		self.LensTable.y = self.QuadTable.h1
+		self.LensTable.w = 2*self.ScopeTable.l
+		self.LensTable.h = 2*self.ScopeTable.l
+
+		self.ReticleTable = {}
+		self.ReticleTable.wdivider = 3.125
+		self.ReticleTable.hdivider = 1.7579/self.ReticleScale		// Draws the texture at 512 when the resolution is 1600x900
+		self.ReticleTable.x = (iScreenWidth/2)-((iScreenHeight/self.ReticleTable.hdivider)/2)
+		self.ReticleTable.y = (iScreenHeight/2)-((iScreenHeight/self.ReticleTable.hdivider)/2)
+		self.ReticleTable.w = iScreenHeight/self.ReticleTable.hdivider
+		self.ReticleTable.h = iScreenHeight/self.ReticleTable.hdivider
+
+		self.FilterTable = {}
+		self.FilterTable.wdivider = 3.125
+		self.FilterTable.hdivider = 1.7579/1.35	
+		self.FilterTable.x = (iScreenWidth/2)-((iScreenHeight/self.FilterTable.hdivider)/2)
+		self.FilterTable.y = (iScreenHeight/2)-((iScreenHeight/self.FilterTable.hdivider)/2)
+		self.FilterTable.w = iScreenHeight/self.FilterTable.hdivider
+		self.FilterTable.h = iScreenHeight/self.FilterTable.hdivider
+	end
 
 	// Set the hold-type
 	self:SetWeaponHoldType(self.HoldType)
@@ -651,9 +750,9 @@ predicted and other junk.
 ---------------------------------------------------------*/
 function SWEP:SecondaryAttack()
 
-	local zoom = self:GetNWFloat("PlayerFOV") - 10
-
 	if CurTime() < self:GetNWFloat("InReload") then return end
+
+	local zoom = self:GetNWFloat("PlayerFOV") - self.Secondary.Zoom
 
 	if !self:GetNWBool("InIron") then
 		self:SetNWBool("UnderBarrel", false)
@@ -661,13 +760,124 @@ function SWEP:SecondaryAttack()
 		self.Owner:CrosshairDisable()
 		self.Owner:SetFOV(zoom, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2)
+		if self.Sniper then
+			self:SetIronsights(true, self.Owner)
+		end
 	elseif self:GetNWBool("InIron") then
 		self:SetNWBool("InIron", false)
 		self.Owner:CrosshairEnable()
 		self.Owner:SetFOV(0, 0.2)
 		self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
+		if self.Sniper then
+			self:SetIronsights(false, self.Owner)
+		end
 	end
 
+end
+
+
+/*---------------------------------------------------------
+DrawHud
+
+- Display our scope texture
+---------------------------------------------------------*/
+function SWEP:DrawHUD()
+
+	if self:GetNWBool("InIron") and self.Sniper then
+	
+		if self.Secondary.UseACOG then
+			-- Draw the FAKE SCOPE THANG
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_closedsight"))
+			surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
+
+			-- Draw the CHEVRON
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_acogchevron"))
+			surface.DrawTexturedRect(self.ReticleTable.x, self.ReticleTable.y, self.ReticleTable.w, self.ReticleTable.h)
+
+			-- Draw the ACOG REFERENCE LINES
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_acogcross"))
+			surface.DrawTexturedRect(self.ReticleTable.x, self.ReticleTable.y, self.ReticleTable.w, self.ReticleTable.h)
+		end
+
+		if self.Secondary.UseMilDot then
+			-- Draw the MIL DOT SCOPE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_scopesight"))
+			surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
+		end
+
+		if self.Secondary.UseSVD then
+			-- Draw the SVD SCOPE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_svdsight"))
+			surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
+		end
+
+		if self.Secondary.UseParabolic then
+			-- Draw the PARABOLIC SCOPE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_parabolicsight"))
+			surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
+		end
+
+		if self.Secondary.UseElcan then
+			-- Draw the RETICLE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_elcanreticle"))
+			surface.DrawTexturedRect(self.ReticleTable.x, self.ReticleTable.y, self.ReticleTable.w, self.ReticleTable.h)
+			
+			-- Draw the ELCAN SCOPE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_elcansight"))
+			surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
+		end
+
+		if self.Secondary.UseGreenDuplex then
+			-- Draw the RETICLE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_nvgilluminatedduplex"))
+			surface.DrawTexturedRect(self.ReticleTable.x, self.ReticleTable.y, self.ReticleTable.w, self.ReticleTable.h)
+
+			-- Draw the SCOPE
+			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetTexture(surface.GetTextureID("scope/gdcw_closedsight"))
+			surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
+		end
+
+		if self.Secondary.UseRangefinder then
+			local trace = {}
+			trace.start = self.Owner:GetShootPos()
+			trace.endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector()*60000		// Laser Rangefinder
+			trace.filter = self.Owner
+			local tr = util.TraceLine( trace )
+
+			self.Range = self.Owner:GetShootPos():Distance(tr.HitPos)/52.5
+			self.Time = math.Round(((self.Range)/self.Velocity)*100)/100
+			self.Drop = math.Round((4.9*(self.Time^2))*100)/100
+
+			draw.SimpleText( "RANGE " ..tostring(math.Round(self.Range)) .. "m","Default",ScrW() / 3, ScrH() * (44/60),Color(130,170,70,255))			//Range in meters
+			draw.SimpleText( "TIME " ..tostring(self.Time) .. "s","Default",ScrW() / 3, ScrH() * (45/60),Color(170,130,70,255))					//Flight time in seconds
+			draw.SimpleText( "DROP " ..tostring(self.Drop) .. "m","Default",ScrW() / 3, ScrH() * (46/60),Color(230,70,70,255))					//Drop in meters
+		end
+		
+	end
+end
+
+
+/*---------------------------------------------------------
+AdjustMouseSensitivity
+
+- Adjust mouse sensitivity while scoped
+---------------------------------------------------------*/
+function SWEP:AdjustMouseSensitivity()
+	if self:GetNWBool("InIron") and self.Sniper then
+		return ( (self:GetNWFloat("PlayerFOV")-self.Secondary.Zoom) / self:GetNWFloat("PlayerFOV") )
+	else 
+		return 1
+	end
 end
 
 

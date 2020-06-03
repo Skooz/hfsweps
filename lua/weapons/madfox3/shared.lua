@@ -17,8 +17,8 @@ SWEP.Purpose				= "Homefront SWEPs"
 SWEP.Instructions			= "E + R = Swap Modes.\n"
 
 // Settings
-SWEP.ViewModel				= Model("models/weapons/homefront/v_sniper_m200.mdl")
-SWEP.WorldModel				= Model("models/weapons/homefront/w_sniper_m200.mdl")
+SWEP.ViewModel				= Model("models/weapons/homefront/v_explosive_at4.mdl")
+SWEP.WorldModel				= Model("models/weapons/homefront/w_explosive_at4.mdl")
 SWEP.ViewModelFOV			= 50		
 SWEP.ViewModelFlip			= false		
 SWEP.DrawCrosshair			= true	
@@ -30,9 +30,9 @@ SWEP.Primary.Sound 			= Sound("Weapon_HFM110.Single")
 SWEP.Primary.SoundEnd 		= Sound("Weapon_HFKriss.SingleEnd")		
 SWEP.Primary.Round 			= ("")								
 SWEP.Primary.Damage			= 12
-SWEP.Primary.RPM			= 1100					// This is in Rounds Per Minute
-SWEP.Primary.ClipSize		= 30				// Size of a clip
-SWEP.Primary.DefaultClip	= 120				// Amount of ammo you spawn with
+SWEP.Primary.RPM			= 60					// This is in Rounds Per Minute
+SWEP.Primary.ClipSize		= 1				// Size of a clip
+SWEP.Primary.DefaultClip	= 5				// Amount of ammo you spawn with
 SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 1					// Maximum side recoil (koolaid)
@@ -56,7 +56,7 @@ SWEP.RunSightsPos 			= Vector (0, 0, 0)
 SWEP.RunSightsAng 			= Vector (0, 0, 0)
 
 // Shells
-SWEP.EjectsShells 		= true
+SWEP.EjectsShells 		= false
 SWEP.ShellDelay 		= 0
 SWEP.ShellEffect 		= "sim_shelleject_fas_556"
 
@@ -77,31 +77,7 @@ SWEP.ReticleScale 				= 1
 SWEP.Velocity					= 850
 
 
-// M249 LMG
--- SWEP.Shotgun 			= false 
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= false
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
-
-// M110
--- SWEP.Sniper				= false
--- SWEP.Shotgun 			= false 
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= true
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
-
-// M200
-// delay attacks
+SWEP.Rocket				= true
 SWEP.Sniper				= false
 SWEP.Shotgun 			= false 
 SWEP.Burst				= false
@@ -112,6 +88,7 @@ SWEP.AnimDraw 			= ACT_VM_DRAW
 SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
 SWEP.AnimReload			= ACT_VM_RELOAD
 SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
+
 
 SWEP.Offset = {
 	Pos = 
@@ -395,7 +372,7 @@ function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 
 	// Animate!
-	if self:GetNWBool("InIron") then
+	if self:GetNWBool("InIron") and !self.Sniper then
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
 	else
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
@@ -487,7 +464,7 @@ function SWEP:SpecialAttack()
 		if self:GetNWInt("UnderMag") > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
-			self:ShootBullet(8, 12, 0.1)
+			self:ShootBullet(6, 12, 0.065)
 			self:ShootFX()
 			self:SetNextPrimaryFire( CurTime() + 0.6 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
@@ -652,13 +629,13 @@ function SWEP:SecondaryAttack()
 		self:SetNWBool("InIron", true)
 		//self.Owner:CrosshairDisable()
 		self.Owner:SetFOV(zoom, 0.2)
-		self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2)
+		if !self.Sniper then self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2) end
 		self:SetIronsights(true, self.Owner)
 	elseif self:GetNWBool("InIron") then
 		self:SetNWBool("InIron", false)
 		//self.Owner:CrosshairEnable()
 		self.Owner:SetFOV(0, 0.2)
-		self.Weapon:SendWeaponAnim(ACT_VM_IDLE)
+		if !self.Sniper then self.Weapon:SendWeaponAnim(ACT_VM_IDLE) end
 		self:SetIronsights(false, self.Owner)
 	end
 
@@ -917,6 +894,11 @@ Think
 - Think is called every frame / tick
 ---------------------------------------------------------*/
 function SWEP:Think()
+
+	if self.Owner:InVehicle() and self:GetNWBool("FirstHolster") then 
+	self:SetNWBool("FirstHolster", false) 
+	self:Holster(self.Weapon) 
+	end
 
 	// Underbarrel
 	if self.UnderLauncher or self.UnderKey then

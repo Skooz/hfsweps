@@ -18,7 +18,7 @@ SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
 
 SWEP.Primary.KickUp			= 1.25					// Maximum up recoil (rise)
 SWEP.Primary.KickDown		= -0.5					// Maximum down recoil (skeet)
-SWEP.Primary.KickHorizontal	= 0.3					// Maximum side recoil (koolaid)
+SWEP.Primary.KickHorizontal	= 0.4					// Maximum side recoil (koolaid)
 
 SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "ar2"			// What kind of ammo

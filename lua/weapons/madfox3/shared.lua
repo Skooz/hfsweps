@@ -105,73 +105,6 @@ SWEP.Offset = {
 	}
 }
 
-/*
-ANIM LIST:
-
-//
-// M9
-//
-Draw: 			ACT_VM_DRAW
-First-Draw: 	ACT_VM_DRAW_EMPTY
-
-Holster: 		ACT_VM_HOLSTER
-Quick-Holster: 	ACT_VM_HOLSTER_EMPTY
-
-Idle: 			ACT_VM_IDLE
-ADS Idle: 		ACT_VM_IDLE_2
-
-Fire1: 			ACT_VM_PRIMARYATTACK
-ADS Fire: 		ACT_VM_PRIMARYATTACK_2
-
-Reload: 		ACT_VM_RELOAD
-Reload Empty: 	ACT_VM_RELOAD_EMPTY
-
-//
-// M4
-//
-Draw: 			ACT_VM_DRAW
-First-Draw: 	ACT_VM_DRAW_EMPTY
-
-Holster: 		ACT_VM_HOLSTER
-Quick-Holster: 	ACT_VM_HOLSTER_EMPTY
-
-Idle: 			ACT_VM_IDLE
-ADS Idle: 		ACT_VM_IDLE_2
-
-Fire1: 			ACT_VM_PRIMARYATTACK
-ADS Fire: 		ACT_VM_PRIMARYATTACK_2
-
-Reload: ACT_VM_RELOAD
-Reload Branch Dry: ACT_VM_DEPLOY_1
-Reload Branch Tact: ACT_VM_DEPLOY_2
-
-//
-// M4 GL
-//
-
-Idle Snap: ACT_VM_IDLE_4
-
-Under Draw:  ACT_VM_DEPLOY_3
-Under Holster: ACT_VM_UNDEPLOY_1
-Under Quick Holster: ACT_VM_UNDEPLOY_2
-
-Under Idle: ACT_VM_IDLE_3
-
-Under Fire: ACT_VM_PRIMARYATTACK_3
-
-Under Reload: ACT_VM_RELOAD_DEPLOYED
-
-//
-// m4 key
-//
-
-under fire: ACT_VM_PRIMARYATTACK_3
-under reload dry: ACT_SHOTGUN_PUMP
-under reload tact: ACT_SHOTGUN_RELOAD_FINISH
-reload root: ACT_VM_RELOAD
-reload start: ACT_SHOTGUN_RELOAD_START
-
-*/
 
 /*---------------------------------------------------------
 Initialize
@@ -245,7 +178,6 @@ function SWEP:Initialize()
 end
 
 
-
 /*---------------------------------------------------------
 Equip(ply)
 
@@ -257,6 +189,8 @@ function SWEP:Equip(ply)
 	
 	self:SetNWBool("FirstDeploy", true)
 	
+	// Auto load the Masterkey underbarrel.
+	// UnderMagLoaded is so that it doesn't reload every time we pick it up
 	if self.UnderKey and !self:GetNWBool("UnderMagLoaded") then
 		self:SetNWInt("UnderMag", 3)
 		self:SetNWBool("UnderMagLoaded", true)
@@ -312,12 +246,16 @@ Holster(wep)
 ---------------------------------------------------------*/
 function SWEP:Holster(wep)
 
+	// If not valid then return
 	if !IsValid(self.Owner) or !IsValid(wep) or !IsValid(self.Weapon) then return end
 
+	// Check animation timers
 	if self:GetNWFloat("InReload") > CurTime() or self:GetNWFloat("InHolster")-0.2 > CurTime() then return end
 
+	// Stop firing sound
 	if self.Primary.Automatic then self.Weapon:StopSound(self.Primary.Sound) end
 
+	// Play an animation before actually holstering
 	if self:GetNWBool("FirstHolster") then
 		self:SetNWBool("FirstHolster", false)
 		self.Weapon:SendWeaponAnim(ACT_VM_HOLSTER)
@@ -330,9 +268,9 @@ function SWEP:Holster(wep)
 				if SERVER then self.Owner:SelectWeapon(wep) end
 			end
 		end)
-		return false
+		return false 	// Returns false on the FIRST call
 	else
-		return true
+		return true 	// Returns true on the SECOND call, or when FirstHolster is false
 	end
 
 end
@@ -369,22 +307,24 @@ PrimaryAttack
 ---------------------------------------------------------*/
 function SWEP:PrimaryAttack()
 
-	if not self:CanPrimaryAttack() then return end
+	if !self:CanPrimaryAttack() then return end
 
-	// Animate!
+	// Animate
 	if self:GetNWBool("InIron") and !self.Sniper then
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
 	else
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	end
 	
-	// Shoot!
+	// Shoot
 	if self.Shotgun then 
 		self:ShootBullet(self.Primary.Damage, 12, 0.05) 	-- damage, numbullets, cone
 	else
 		self:ShootBullet(self.Primary.Damage, 1, 0)
 	end
+	self.Weapon:TakePrimaryAmmo(1)
 
+	// Sound
 	if !self.Primary.Automatic then
 		self.Weapon:EmitSound(self.Primary.Sound)
 	else
@@ -393,28 +333,34 @@ function SWEP:PrimaryAttack()
 		end
 	end
 
-	self.Weapon:TakePrimaryAmmo(1)
+	// etc
 	self:ShootFX()
 	self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 
 end
 
 
+/*---------------------------------------------------------
+BurstAttack
+
+- Fire a three round burst
+---------------------------------------------------------*/
 function SWEP:BurstAttack()
 
 	// Returns
 	if self.Weapon:Clip1() <= 0 or !IsFirstTimePredicted() then return end
 
-	// Animate!
+	// Animate (Scar has 'bursty' animation, so we call the anim here)
 	if self:GetNWBool("InIron") then
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
 	else
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	end
 
-	// Shoot!
+	// Sound
 	self.Weapon:EmitSound(self.Primary.Sound)
 	
+	// timers lol
 	self:ShootBullet(self.Primary.Damage, 1, 0) 	-- damage, numbullets, cone
 	self.Weapon:TakePrimaryAmmo(1)
 	self:ShootFX()
@@ -443,10 +389,10 @@ end
 /*---------------------------------------------------------
 SpecialAttack
 
-- This function handles 
+- This function handles underbarrel attacks
 ---------------------------------------------------------*/
 function SWEP:SpecialAttack()
-	if self.UnderLauncher then
+	if self.UnderLauncher then // M203 Attack
 		if !self:GetNWBool("UnderReload") and self.Weapon:Ammo2() > 0 and IsFirstTimePredicted() then // If we don't need a reload
 			self:SetNWBool("UnderReload", true) // We need a reload
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
@@ -459,7 +405,7 @@ function SWEP:SpecialAttack()
 			self:SetNextPrimaryFire( CurTime() + 1 )
 			return
 		end
-	elseif self.UnderKey then
+	elseif self.UnderKey then // Masterkey attack
 		if CurTime() < self:GetNWFloat("InReload") then return end
 		if self:GetNWInt("UnderMag") > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
@@ -577,7 +523,7 @@ end
 /*---------------------------------------------------------
 DoImpactEffect
 
-- Mod the impact effect of bullets
+- Modify the impact effect of bullets
 ---------------------------------------------------------*/
 function SWEP:DoImpactEffect( tr, nDamageType )
 	if ( tr.HitSky ) then return end
@@ -595,7 +541,6 @@ FireRocket
 
 - Called in PrimaryAttack
 - Rockets are entities, as are Generic Default's bullets
-- Think of GD's bullets as mini rockets
 ---------------------------------------------------------*/
 function SWEP:FireRocket(round) 
 
@@ -645,7 +590,7 @@ end
 /*---------------------------------------------------------
 DrawHud
 
-- Display our scope texture
+- Draw scope textures!
 ---------------------------------------------------------*/
 function SWEP:DrawHUD()
 
@@ -736,7 +681,7 @@ end
 /*---------------------------------------------------------
 AdjustMouseSensitivity
 
-- Adjust mouse sensitivity while scoped
+- Adjust mouse sensitivity based on weapon zoom
 ---------------------------------------------------------*/
 function SWEP:AdjustMouseSensitivity()
 	if self:GetNWBool("InIron") then
@@ -759,16 +704,14 @@ function SWEP:Reload()
 	// Returns
 	if self.Owner:KeyDown(IN_USE) or CurTime() <= self:GetNWFloat("InReload")  then return end
 
-		// Exit ironsights
-	if self:GetNWBool("InIron") then
-		self:SecondaryAttack()
-	end
+	// Disable ironsights
+	if self:GetNWBool("InIron") then self:SecondaryAttack() end
 
-	// Stop sound just in case
+	// Stop sound
 	if self.Primary.Automatic then self.Weapon:StopSound(self.Primary.Sound) end
 
-	//Underbarrel reloads
-	if self:GetNWBool("UnderBarrel") then // Launcher reload
+	// Reload
+	if self:GetNWBool("UnderBarrel") then // Underbarrel reloads
 		self:ReloadUnderBarrel()
 	elseif self.Shotgun and self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 then 
 		// this is pretty lazy, but the shell loading sequence is looped in the QC, so this is the easiest solution.
@@ -797,8 +740,7 @@ function SWEP:Reload()
 				end)
 			end
 		end)
-	else 
-		// Regular Reload
+	else // Regular Reload
 		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
 		// Animation
 		if self.BranchReload then // Branch reloads
@@ -823,7 +765,6 @@ function SWEP:Reload()
 			end
 			self:SetNWFloat("InReload", self.Owner:GetViewModel():SequenceDuration())
 		end
-		
 	end
 	
 end
@@ -895,12 +836,7 @@ Think
 ---------------------------------------------------------*/
 function SWEP:Think()
 
-	if self.Owner:InVehicle() and self:GetNWBool("FirstHolster") then 
-	self:SetNWBool("FirstHolster", false) 
-	self:Holster(self.Weapon) 
-	end
-
-	// Underbarrel
+	// Underbarrel mode
 	if self.UnderLauncher or self.UnderKey then
 		if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
 			if CurTime() <= self:GetNWFloat("InReload") then return end
@@ -919,14 +855,12 @@ function SWEP:Think()
 		end
 	end
 
-	// Handle sound loops
+	// Firing sound loops
 	if self.Primary.Automatic and !self:GetNWBool("UnderBarrel") then
 		if self.Owner:KeyDown(IN_ATTACK) and self:GetNextPrimaryFire() < CurTime() and self:CanPrimaryAttack() and IsFirstTimePredicted() then
 			self.Weapon:EmitSound(self.Primary.Sound)
 		elseif self.Owner:KeyReleased(IN_ATTACK) and self:CanPrimaryAttack() and IsFirstTimePredicted() then
 			self.Weapon:EmitSound(self.Primary.SoundEnd)
-		//elseif !self.Owner:KeyDown(IN_ATTACK) then 
-			//self.Weapon:StopSound(self.Primary.Sound)
 		end
 	end
 
@@ -952,7 +886,7 @@ GetViewModelPosition
 
 - Manipulate viewmodel position
 ---------------------------------------------------------*/
-local IRONSIGHT_TIME = 0.06
+local IRONSIGHT_TIME = 0.066
 
 function SWEP:GetViewModelPosition(pos, ang)
 

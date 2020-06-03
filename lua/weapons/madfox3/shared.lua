@@ -42,7 +42,7 @@ SWEP.HoldType 				= "ar2"
 
 // Secondary
 SWEP.Secondary.Zoom			= 0.9	
-SWEP.Secondary.ClipSize		= 0						// Size of a clip - We don't want a secondary clip size since this isn't actually handled
+SWEP.Secondary.ClipSize		= 0						// There is no secondary clip(?)
 SWEP.Secondary.DefaultClip	= 10					// Amount of ammo you spawn with
 SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.Automatic	= false				// Automatic/Semi Auto
@@ -76,98 +76,6 @@ SWEP.ScopeScale 				= 1
 SWEP.ReticleScale 				= 1
 SWEP.Velocity					= 850
 
-
-// ACR
--- SWEP.Burst			= false
--- SWEP.BranchReload 	= false
--- SWEP.UnderLauncher 	= false
--- SWEP.UnderKey		= false
--- SWEP.AnimDraw 		= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW_EMPTY
--- SWEP.AnimReload		= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
-
-// ACR GL
--- SWEP.Burst			= false
--- SWEP.BranchReload 	= false
--- SWEP.UnderLauncher 	= true
--- SWEP.UnderKey		= false
--- SWEP.AnimDraw 		= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW_EMPTY
--- SWEP.AnimReload		= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
-
-// SCAR
--- SWEP.Burst			= true
--- SWEP.BranchReload 	= true
--- SWEP.UnderLauncher 	= false
--- SWEP.UnderKey		= false
--- SWEP.AnimDraw 		= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 	= ACT_VM_DRAW_EMPTY // no empty on gl or key
-
-// T3AK - use acr stop sound
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= false
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW // no empty on gl or key
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty		= ACT_VM_RELOAD
-
-// XM10
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= false
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty		= ACT_VM_RELOAD
-
-// 870
--- SWEP.Shotgun 			= true
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= false
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty		= ACT_VM_RELOAD
-
-// Diablo
--- SWEP.Shotgun 			= false 
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= false
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW_EMPTY
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
-
-// Kriss
--- SWEP.Shotgun 			= false 
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= true
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
-
-// Scar LMG
--- SWEP.Shotgun 			= false 
--- SWEP.Burst				= false
--- SWEP.BranchReload 		= true
--- SWEP.UnderLauncher 		= false
--- SWEP.UnderKey			= false
--- SWEP.AnimDraw 			= ACT_VM_DRAW
--- SWEP.AnimDrawEmpty 		= ACT_VM_DRAW
--- SWEP.AnimReload			= ACT_VM_RELOAD
--- SWEP.AnimReloadEmpty	= ACT_VM_RELOAD
 
 // M249 LMG
 -- SWEP.Shotgun 			= false 
@@ -281,7 +189,6 @@ Under Reload: ACT_VM_RELOAD_DEPLOYED
 //
 
 under fire: ACT_VM_PRIMARYATTACK_3
-
 under reload dry: ACT_SHOTGUN_PUMP
 under reload tact: ACT_SHOTGUN_RELOAD_FINISH
 reload root: ACT_VM_RELOAD
@@ -359,6 +266,7 @@ function SWEP:Initialize()
 	self:SetWeaponHoldType(self.HoldType)
 
 end
+
 
 
 /*---------------------------------------------------------
@@ -579,7 +487,7 @@ function SWEP:SpecialAttack()
 		if self:GetNWInt("UnderMag") > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_3)
 			self.Weapon:EmitSound("Weapon_HFMasterKey.Single")
-			self:ShootBullet(10, 12, 0.1)
+			self:ShootBullet(8, 12, 0.1)
 			self:ShootFX()
 			self:SetNextPrimaryFire( CurTime() + 0.6 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
@@ -624,8 +532,6 @@ function SWEP:ShootFX()
 	end
 
 	// FX  Data
-
-
 	local fx = EffectData()
 
 	// Muzzle flash
@@ -856,7 +762,7 @@ AdjustMouseSensitivity
 - Adjust mouse sensitivity while scoped
 ---------------------------------------------------------*/
 function SWEP:AdjustMouseSensitivity()
-	if self:GetNWBool("InIron") and self.Sniper then
+	if self:GetNWBool("InIron") then
 		return self.Secondary.Zoom 
 	else 
 		return 1
@@ -876,13 +782,19 @@ function SWEP:Reload()
 	// Returns
 	if self.Owner:KeyDown(IN_USE) or CurTime() <= self:GetNWFloat("InReload")  then return end
 
+		// Exit ironsights
+	if self:GetNWBool("InIron") then
+		self:SecondaryAttack()
+	end
+
 	// Stop sound just in case
 	if self.Primary.Automatic then self.Weapon:StopSound(self.Primary.Sound) end
 
 	//Underbarrel reloads
 	if self:GetNWBool("UnderBarrel") then // Launcher reload
 		self:ReloadUnderBarrel()
-	elseif self.Shotgun then
+	elseif self.Shotgun and self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 then 
+		// this is pretty lazy, but the shell loading sequence is looped in the QC, so this is the easiest solution.
 		local numToReload = self.Primary.ClipSize - self.Weapon:Clip1()
 		self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
 		self.Weapon:SetClip1(self.Weapon:Clip1()+1)
@@ -896,21 +808,21 @@ function SWEP:Reload()
 		self:SetNWFloat("InReload", CurTime() + 3)
 		timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
 		function()
-			self.Weapon:SendWeaponAnim(ACT_VM_RELOAD)
-			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()*numToReload)
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration()*numToReload,
-			function()
-				self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
-				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			end)
+			if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+				self.Weapon:SendWeaponAnim(ACT_VM_RELOAD)
+				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()*numToReload)
+				timer.Simple(self.Owner:GetViewModel():SequenceDuration()*numToReload,
+				function()
+					if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+						self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
+						self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+					end
+				end)
+			end
 		end)
 	else 
 		// Regular Reload
 		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
-		// Exit ironsights
-		if self:GetNWBool("InIron") then
-			self:SecondaryAttack()
-		end
 		// Animation
 		if self.BranchReload then // Branch reloads
 			self.Weapon:DefaultReload(ACT_VM_RELOAD)
@@ -976,18 +888,22 @@ function SWEP:ReloadUnderBarrel()
 			self.Weapon:TakeSecondaryAmmo(numToReload)
 			timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
 			function()
-				self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
-				self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + numToReload) // Load more shells
-				self.Weapon:SetNextPrimaryFire(CurTime() + 3)
-				self.Weapon:SetNextSecondaryFire(CurTime() + 3)
-				self:SetNWFloat("InReload", CurTime() + 3)
-				timer.Simple(self.Owner:GetViewModel():SequenceDuration() * numToReload, // Repeat as many times as necessary
-				function()
-					self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
-					self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-					self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				end)
+				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+					self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
+					self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + numToReload) // Load more shells
+					self.Weapon:SetNextPrimaryFire(CurTime() + 3)
+					self.Weapon:SetNextSecondaryFire(CurTime() + 3)
+					self:SetNWFloat("InReload", CurTime() + 3)
+					timer.Simple(self.Owner:GetViewModel():SequenceDuration() * numToReload, // Repeat as many times as necessary
+					function()
+						if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
+							self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
+							self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+							self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+							self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+						end
+					end)
+				end
 			end)
 		end
 	end
@@ -1054,7 +970,7 @@ GetViewModelPosition
 
 - Manipulate viewmodel position
 ---------------------------------------------------------*/
-local IRONSIGHT_TIME = 0.05
+local IRONSIGHT_TIME = 0.06
 
 function SWEP:GetViewModelPosition(pos, ang)
 

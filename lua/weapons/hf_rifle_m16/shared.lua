@@ -11,14 +11,14 @@ SWEP.AdminSpawnable			= true
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFM16.Single")
 SWEP.Primary.SoundEnd 		= Sound("")					
-SWEP.Primary.Damage			= 12							
+SWEP.Primary.Damage			= 20							
 SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
 
-SWEP.Primary.KickUp			= 1.5					// Maximum up recoil (rise)
-SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
-SWEP.Primary.KickHorizontal	= 0.5					// Maximum side recoil (koolaid)
+SWEP.Primary.KickUp			= 1					// Maximum up recoil (rise)
+SWEP.Primary.KickDown		= -.5					// Maximum down recoil (skeet)
+SWEP.Primary.KickHorizontal	= 0.2					// Maximum side recoil (koolaid)
 
 SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
 SWEP.Primary.Ammo			= "ar2"			// What kind of ammo

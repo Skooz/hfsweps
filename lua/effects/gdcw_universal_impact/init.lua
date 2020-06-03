@@ -248,11 +248,11 @@ function EFFECT:Metal()
 	end
 
 	// Spark 
-	for i=0, 15*self.Scale do 
+	for i=0, 10*self.Scale do 
 		local particle = self.Emitter:Add( "effects/spark", self.Pos ) 
 		if (particle) then 
 		particle:SetVelocity( ((self.DirVec*0.75)+VectorRand()) * math.Rand(50, 300)*self.Scale ) 
-		particle:SetDieTime( math.Rand(0.05, 0.1) ) 				 
+		particle:SetDieTime( 10 ) 				 
 		particle:SetStartAlpha( 255 )  				 
 		particle:SetStartSize( math.Rand(4, 6)*self.Scale ) 
 		particle:SetEndSize( 0 ) 				 
@@ -263,6 +263,8 @@ function EFFECT:Metal()
 		particle:SetAirResistance( 20 ) 
 		particle:SetGravity( Vector( 0, 0, -600 ) ) 
 		particle:SetVelocityScale(true)
+		particle:SetCollide(true)
+		particle:SetBounce(0.45)
 		end 
 	end 
 

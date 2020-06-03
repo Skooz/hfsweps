@@ -31,7 +31,7 @@ sound.Add({
 	name 	= "Weapon_HFM9.Single",
 	channel = CHAN_WEAPON,
 	volume 	= 1.0,
-	level = 100,
+	level = 140,
     pitch = { 95, 105 },
 	sound 	=  "weapons/homefront/m9/m9_fire.wav" 
 })
@@ -204,6 +204,7 @@ sound.Add({
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
 	level = 140,
+    pitch = { 93, 107 },
 	sound 	=  "weapons/homefront/masterkey/masterkey_fire.wav",
 })
 
@@ -214,6 +215,7 @@ sound.Add({
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
 	level = 90,
+    pitch = { 90, 110 },
 	sound 	=  "weapons/homefront/masterkey/masterkey_cock.wav",
 })
 util.PrecacheSound("Weapon_HFMasterKey.Cock")
@@ -223,6 +225,7 @@ sound.Add({
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
 	level = 90,
+    pitch = { 93, 107 },
 	sound 	=  {"weapons/homefront/masterkey/masterkey_insert1.wav",
     "weapons/homefront/masterkey/masterkey_insert2.wav",
     }

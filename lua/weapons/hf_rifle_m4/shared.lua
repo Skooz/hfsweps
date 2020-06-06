@@ -18,7 +18,7 @@ SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
 
 SWEP.Primary.KickUp			= 0.5					// Maximum up recoil (rise)
-SWEP.Primary.KickDown		= -0.5					// Maximum down recoil (skeet)
+SWEP.Primary.KickDown		= -0.5				// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 0.5					// Maximum side recoil (koolaid)
 
 SWEP.Primary.Automatic		= true				// Automatic/Semi Auto
@@ -62,13 +62,14 @@ SWEP.Offset = {
 	}
 }
 
+
+// Setup Bodygroups
 function SWEP:Config()
-	// Setup Bodygroups
 	// Hands
 	/*
-	0 - gay
-	1 - chink
-	2 - murica
+	0 - homeless
+	1 - gaming addiction
+	2 - murican
 	*/
 	self.Owner:GetViewModel():SetBodygroup(1,2)
 	
@@ -102,6 +103,7 @@ function SWEP:Config()
 	*/
 	self.Owner:GetViewModel():SetBodygroup(4,0) 
 
+	// ACOG Config
 	if self.Owner:GetViewModel():GetBodygroup(2) >= 8 then
 		// Acog pos
 		self.IronSightsPos 			= Vector (0, 0, 0.6)
@@ -110,20 +112,13 @@ function SWEP:Config()
 		// Zoom
 		self.Secondary.Zoom			= 0.3
 
-		// Viewmodel zoom (make it look nice)
-		local zoom = 90
-		local fovDiff = (zoom - 50)
-
-		// Networked vars are kinda laggy I guess
-		if self:GetNWBool("InIron") and self.ViewModelFOV < zoom then
-			self.ViewModelFOV = self.ViewModelFOV + (FrameTime() * 7 * fovDiff)
-		elseif !self:GetNWBool("InIron") and self.ViewModelFOV > 50 then
-			self.ViewModelFOV = self.ViewModelFOV - (FrameTime() * 7 * fovDiff)
-		end
-	else
+		// Viewmodel zoom 
+		self:SetViewmodelFOV(90, 0.1)
+	elseif self.Owner:GetViewModel():GetBodygroup(2) > 1 then
 		// Ironsight pos
-		self.IronSightsPos 			= Vector (0, 0, 0)
-		self.IronSightsAng 			= Vector (-0.35, 0, 0)
+		self.IronSightsPos 			= Vector (0, 0, 0.25)
+		self.IronSightsAng 			= Vector (0, 0, 0)
 		self.Secondary.Zoom			= 0.85
 	end
 end
+

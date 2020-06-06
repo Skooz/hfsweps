@@ -207,7 +207,7 @@ function SWEP:DoDrawCrosshair( x, y )
 		// Specifications
 		x = ScrW() / 2
 		y = ScrH() / 2
-		radius = 2
+		radius = 2.5
 		seg = 8	
 		// Calculations
 		local cir = {}
@@ -225,9 +225,11 @@ function SWEP:DoDrawCrosshair( x, y )
 
 end
 
+
+// Setup Bodygroups
 // Ideally you want to configure this in the specific weapon files
 function SWEP:Config()
-	// Setup Bodygroups
+	
 	// Hands
 	/*
 	0 - homeless
@@ -265,6 +267,34 @@ function SWEP:Config()
 	1 - rail
 	*/
 	self.Owner:GetViewModel():SetBodygroup(4,0) 
+end
+
+
+function SWEP:SetViewmodelFOV(toFOV, dur)
+	if not game.SinglePlayer() and not IsFirstTimePredicted() then return end // fix prediction in mp
+
+	local shoulder_fov = 50		// the default fov
+	local in_iron_fov = toFOV	// the fov we're switching to
+	local duration = dur		// the duration of the fov change
+	local fov_change			// the fov to set
+
+	if self:GetNWBool("InIron") and self.ViewModelFOV < in_iron_fov then
+		fov_change = in_iron_fov - shoulder_fov
+	elseif !self:GetNWBool("InIron") and self.ViewModelFOV > shoulder_fov then
+		fov_change = shoulder_fov - in_iron_fov
+	else
+		fov_change = 0
+	end
+	
+	if fov_change != 0 then
+		local amount_to_change
+		if FrameTime() > duration then
+			amount_to_change = duration * fov_change
+		else
+			amount_to_change = FrameTime()/duration * fov_change
+		end
+		self.ViewModelFOV = self.ViewModelFOV + amount_to_change
+	end
 end
 
 
@@ -976,7 +1006,7 @@ function SWEP:Think()
 
 	// Call custom functions
 	self:Config()
-	self:UnderBarrel()	// Toggle UNderBarrel
+	self:UnderBarrel()	// Toggle UnderBarrel
 	self:FiringSound()	// Firing loop sounds
 	self:HoldSights()	// Call SecondaryAttack if IN_ATTACK2 released
 	self:Sway()			// Set sway & bob values

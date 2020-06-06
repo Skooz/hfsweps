@@ -11,7 +11,7 @@ SWEP.AdminSpawnable			= true
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFT3AK.Single")
 SWEP.Primary.SoundEnd 		= Sound("Weapon_HFT3AK.SingleEnd")					
-SWEP.Primary.Damage			= 20							
+SWEP.Primary.Damage			= 18							
 SWEP.Primary.RPM			= 600					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
@@ -30,7 +30,7 @@ SWEP.Secondary.Ammo			= ""
 SWEP.Secondary.Zoom			= 0.85	
 
 // Adjust sight position
-SWEP.IronSightsPos 			= Vector (0, 0, 0)
+SWEP.IronSightsPos 			= Vector (-0.005, 0, 0)
 SWEP.IronSightsAng 			= Vector (0.15, 0.01, 0)
 
 // Run Position

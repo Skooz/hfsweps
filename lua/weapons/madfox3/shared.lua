@@ -5,7 +5,7 @@
 ~
 ~ Zookie 			- dude, that's me
 ~ Marlwolf 			- dude, he's kinda cute
-~ Magenta 			- dude, she hates my soul
+~ Magenta 			- dude, she's kinda cute but hates my soul
 ~ Generic Default 	- dude, that's a dude
 ---------------------------------------------------------------------------------------*/
 
@@ -75,7 +75,6 @@ SWEP.data.ironsights			= 1
 SWEP.ScopeScale 				= 1
 SWEP.ReticleScale 				= 1
 SWEP.Velocity					= 850
-
 
 SWEP.Rocket				= true
 SWEP.Sniper				= false
@@ -199,6 +198,76 @@ function SWEP:Equip(ply)
 end
 
 
+function SWEP:DoDrawCrosshair( x, y )
+	surface.SetDrawColor( 255, 0, 0, 200)
+	draw.NoTexture()
+
+	if self:GetNWBool("InIron") then
+		// Draw a polygon
+		// Specifications
+		x = ScrW() / 2
+		y = ScrH() / 2
+		radius = 2
+		seg = 8	
+		// Calculations
+		local cir = {}
+		table.insert( cir, { x = x, y = y, u = 0.5, v = 0.5 } )
+		for i = 0, seg do
+			local a = math.rad( ( i / seg ) * -360 )
+			table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
+		end
+		local a = math.rad( 0 ) -- This is needed for non absolute segment counts
+		table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
+		// Do draw
+		surface.DrawPoly( cir )
+		return true
+	end
+
+end
+
+// Ideally you want to configure this in the specific weapon files
+function SWEP:Config()
+	// Setup Bodygroups
+	// Hands
+	/*
+	0 - homeless
+	1 - gaming addiction
+	2 - murican
+	*/
+	self.Owner:GetViewModel():SetBodygroup(1,0)
+	
+	// Sight
+	/*
+	0 - none
+	1 - ironsight
+	2 - dot
+	3 - dot
+	4 - dot
+	5 - dot
+	6 - dot
+	7 - dot
+	8 - acog 1
+	9 - acog 2
+	10 - acog 3
+	*/
+	self.Owner:GetViewModel():SetBodygroup(2,1) 
+	
+	// Frontsight
+	/*
+	0 - none
+	1 - frontsight
+	*/
+	self.Owner:GetViewModel():SetBodygroup(3,1) 
+
+	// AK Rail
+	/*
+	0 - none
+	1 - rail
+	*/
+	self.Owner:GetViewModel():SetBodygroup(4,0) 
+end
+
+
 /*---------------------------------------------------------
 Deploy
 
@@ -206,13 +275,6 @@ Deploy
 - Do deploy animation and some variable setup here.
 ---------------------------------------------------------*/
 function SWEP:Deploy()
-
-	// Setup Bodygroups
-	if self.Owner:IsPlayer() then
-		self.Owner:GetViewModel():SetBodygroup(1,2) // Hands
-		self.Owner:GetViewModel():SetBodygroup(2,1) // Sight
-		self.Owner:GetViewModel():SetBodygroup(3,1) // Frontsight
-	end
 
 	// Set the hold-type
 	self:SetWeaponHoldType(self.HoldType)
@@ -328,7 +390,7 @@ function SWEP:PrimaryAttack()
 	if !self.Primary.Automatic then
 		self.Weapon:EmitSound(self.Primary.Sound)
 	else
-		if self.Weapon:Clip1() <= 1 then
+		if self.Weapon:Clip1() <= 0 then
 			self.Weapon:EmitSound(self.Primary.SoundEnd)
 		end
 	end
@@ -513,7 +575,7 @@ function SWEP:ShootBullet( damage, num_bullets, aimcone )
 	bullet.Tracer	= 0 -- Show a tracer on every x bullets
 	bullet.Force	= (0.1*damage) -- Amount of force to give to phys objects
 	bullet.Damage	= damage
-	bullet.AmmoType = "Pistol"
+	bullet.AmmoType = self.Primary.Ammo
 
 	self.Owner:FireBullets( bullet )
 
@@ -565,8 +627,9 @@ predicted and other junk.
 ---------------------------------------------------------*/
 function SWEP:SecondaryAttack()
 
-	if CurTime() < self:GetNWFloat("InReload") then return end
+	if !IsFirstTimePredicted() then return end
 
+	if CurTime() < self:GetNWFloat("InReload") then return end
 	local zoom = self:GetNWFloat("PlayerFOV") * self.Secondary.Zoom
 
 	if !self:GetNWBool("InIron") then
@@ -584,6 +647,19 @@ function SWEP:SecondaryAttack()
 		self:SetIronsights(false, self.Owner)
 	end
 
+end
+
+
+/*---------------------------------------------------------
+HoldSights
+
+- Think is called every frame / tick
+---------------------------------------------------------*/
+function SWEP:HoldSights()
+	// Hold for ADS
+	if self.Owner:KeyReleased(IN_ATTACK2) and self:GetNWBool("InIron") and IsFirstTimePredicted() then
+		self:SecondaryAttack()
+	end
 end
 
 
@@ -744,17 +820,20 @@ function SWEP:Reload()
 		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
 		// Animation
 		if self.BranchReload then // Branch reloads
+			local clip1 = self.Weapon:Clip1()
 			self.Weapon:DefaultReload(ACT_VM_RELOAD)
-			self:SetNWFloat("InReload", self.Owner:GetViewModel():SequenceDuration() + 0.1)
+			self:SetNWFloat("InReload", CurTime() + 10)
 			timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
 			function()
 				if IsValid(self.Weapon) and IsValid(self.Owner) then
-					if self.Weapon:Clip1() > 0 then
+					if clip1 > 0 then
 						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
+						print("lol")
 					else
 						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
+						print("rofl")
 					end
-					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()-0.2)
+					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration() - 0.2)
 				end
 			end)
 		else // Other reloads
@@ -830,13 +909,11 @@ end
 
 
 /*---------------------------------------------------------
-Think
+UnderBarrel
 
-- Think is called every frame / tick
+- Allow swapping to underbarrel
 ---------------------------------------------------------*/
-function SWEP:Think()
-
-	// Underbarrel mode
+function SWEP:UnderBarrel()
 	if self.UnderLauncher or self.UnderKey then
 		if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
 			if CurTime() <= self:GetNWFloat("InReload") then return end
@@ -854,8 +931,15 @@ function SWEP:Think()
 			end
 		end
 	end
+end
 
-	// Firing sound loops
+
+/*---------------------------------------------------------
+FiringSound
+
+- Firing sound loops
+---------------------------------------------------------*/
+function SWEP:FiringSound()
 	if self.Primary.Automatic and !self:GetNWBool("UnderBarrel") then
 		if self.Owner:KeyDown(IN_ATTACK) and self:GetNextPrimaryFire() < CurTime() and self:CanPrimaryAttack() and IsFirstTimePredicted() then
 			self.Weapon:EmitSound(self.Primary.Sound)
@@ -863,20 +947,39 @@ function SWEP:Think()
 			self.Weapon:EmitSound(self.Primary.SoundEnd)
 		end
 	end
+end
 
-	// Hold for ADS
-	if self.Owner:KeyReleased(IN_ATTACK2) and self:GetNWBool("InIron") and IsFirstTimePredicted() then
-		self:SecondaryAttack()
-	end
 
+/*---------------------------------------------------------
+Sway
+
+- Set sway and bob values
+---------------------------------------------------------*/
+function SWEP:Sway()
 	// Sway values
 	if self:GetNWBool("InIron") then
 		self.SwayScale = 0.1
-		self.BobScale = 0.075
+		self.BobScale = 0.05
 	else
 		self.SwayScale 	= 1
 		self.BobScale 	= 1
 	end
+end
+
+
+/*---------------------------------------------------------
+Think
+
+- Think is called every frame / tick
+---------------------------------------------------------*/
+function SWEP:Think()
+
+	// Call custom functions
+	self:Config()
+	self:UnderBarrel()	// Toggle UNderBarrel
+	self:FiringSound()	// Firing loop sounds
+	self:HoldSights()	// Call SecondaryAttack if IN_ATTACK2 released
+	self:Sway()			// Set sway & bob values
 
 end
 
@@ -886,7 +989,7 @@ GetViewModelPosition
 
 - Manipulate viewmodel position
 ---------------------------------------------------------*/
-local IRONSIGHT_TIME = 0.066
+local IRONSIGHT_TIME = 0.1
 
 function SWEP:GetViewModelPosition(pos, ang)
 
@@ -943,7 +1046,6 @@ DrawWorldModel
 function SWEP:DrawWorldModel( )
 
 	if self.Offset then
-
 		local hand, offset, rotate
 
 		if not IsValid( self.Owner ) then
@@ -969,7 +1071,6 @@ function SWEP:DrawWorldModel( )
 		self:SetRenderOrigin( hand.Pos + offset )
 		self:SetRenderAngles( hand.Ang )
 		self:DrawModel( )
-
 	end
 	
 end

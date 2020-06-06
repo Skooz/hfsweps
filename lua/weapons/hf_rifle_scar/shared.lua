@@ -16,8 +16,8 @@ SWEP.Primary.RPM			= 900					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 30				// Size of a clip
 SWEP.Primary.DefaultClip	= 90				// Default number of bullets in a clip
 
-SWEP.Primary.KickUp			= 1				// Maximum up recoil (rise)
-SWEP.Primary.KickDown		= 1					// Maximum down recoil (skeet)
+SWEP.Primary.KickUp			= 2				// Maximum up recoil (rise)
+SWEP.Primary.KickDown		= 2					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 0.4					// Maximum side recoil (koolaid)
 
 SWEP.Primary.Automatic		= false				// Automatic/Semi Auto

@@ -71,7 +71,7 @@ function EFFECT:Init(data)
 		if not IsValid(data:GetEntity()) or not IsValid(self.WeaponEnt:GetOwner()) then return end
 		particle:SetVelocity(100 * self.Forward + 8 * VectorRand())
 		particle:SetAirResistance( 75 ) 
-		particle:SetGravity( Vector( math.Rand(-70, 70), math.Rand(-70, 70), math.Rand(0, -100) ) * 1.5 )
+		particle:SetGravity( Vector( math.Rand(-70, 70), math.Rand(-70, 70), math.Rand(0, -100) ) * 1.25 )
 		particle:SetDieTime(math.Rand( 1 , 3 ))
 		particle:SetStartAlpha(1)
 		particle:SetEndAlpha(0)

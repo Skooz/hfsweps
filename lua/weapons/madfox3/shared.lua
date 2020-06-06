@@ -273,7 +273,7 @@ end
 function SWEP:SetViewmodelFOV(toFOV, dur)
 	if not game.SinglePlayer() and not IsFirstTimePredicted() then return end // fix prediction in mp
 
-	local shoulder_fov = 50		// the default fov
+	local shoulder_fov = 50		// the baseline viewmodel fov
 	local in_iron_fov = toFOV	// the fov we're switching to
 	local duration = dur		// the duration of the fov change
 	local fov_change			// the fov to set

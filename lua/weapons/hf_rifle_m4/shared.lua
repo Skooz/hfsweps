@@ -28,8 +28,6 @@ SWEP.HoldType 				= "ar2"
 SWEP.Secondary.DefaultClip	= 0					// Default number of bullets in a clip
 SWEP.Secondary.Ammo			= ""
 
-
-
 // Run Position
 SWEP.RunSightsPos 			= Vector (0, 0, 0)
 SWEP.RunSightsAng 			= Vector (0, 0, 0)
@@ -66,59 +64,30 @@ SWEP.Offset = {
 // Setup Bodygroups
 function SWEP:Config()
 	// Hands
-	/*
-	0 - homeless
-	1 - gaming addiction
-	2 - murican
-	*/
+	// 0: homeless; 1: gaming addiction; 2: murican
 	self.Owner:GetViewModel():SetBodygroup(1,2)
 	
 	// Sight
-	/*
-	0 - none
-	1 - ironsight
-	2 - dot
-	3 - dot
-	4 - dot
-	5 - dot
-	6 - dot
-	7 - dot
-	8 - acog 1
-	9 - acog 2
-	10 - acog 3
-	*/
-	self.Owner:GetViewModel():SetBodygroup(2,8) 
+	// 0: none; 1: ironsight; 2-7: dot; 8-10: acog
+	self.Owner:GetViewModel():SetBodygroup(2,1) 
 	
 	// Frontsight
-	/*
-	0 - none
-	1 - frontsight
-	*/
-	self.Owner:GetViewModel():SetBodygroup(3,0) 
-
+	self.Owner:GetViewModel():SetBodygroup(3,1) 
 	// AK Rail
-	/*
-	0 - none
-	1 - rail
-	*/
 	self.Owner:GetViewModel():SetBodygroup(4,0) 
 
-	// ACOG Config
-	if self.Owner:GetViewModel():GetBodygroup(2) >= 8 then
-		// Acog pos
-		self.IronSightsPos 			= Vector (0, 0, 0.6)
-		self.IronSightsAng 			= Vector (-0.8, 0, 0)
-		
-		// Zoom
-		self.Secondary.Zoom			= 0.3
-
-		// Viewmodel zoom 
+	if self.Owner:GetViewModel():GetBodygroup(2) >= 8 then // Acog pos
+		self.IronSightsPos 	= Vector (0, 0, 0.6)
+		self.IronSightsAng 	= Vector (-0.8, 0, 0)
+		self.Secondary.Zoom	= 0.3
 		self:SetViewmodelFOV(90, 0.1)
-	elseif self.Owner:GetViewModel():GetBodygroup(2) > 1 then
-		// Ironsight pos
-		self.IronSightsPos 			= Vector (0, 0, 0.25)
-		self.IronSightsAng 			= Vector (0, 0, 0)
-		self.Secondary.Zoom			= 0.85
+	elseif self.Owner:GetViewModel():GetBodygroup(2) > 1 then // Red-dot pos
+		self.IronSightsPos 	= Vector (0, 0, 0.25)
+		self.IronSightsAng 	= Vector (0, 0, 0)
+		self.Secondary.Zoom	= 0.85
+	else // Iron pos
+		self.IronSightsPos 	= Vector (0, 0, 0)
+		self.IronSightsAng 	= Vector (-0.3, 0, 0)
 	end
 end
 

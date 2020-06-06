@@ -62,7 +62,7 @@ function EFFECT:Dust()
 	self.Emitter = ParticleEmitter( self.Pos )
 	
 	// Smoke
-	for i=0, 15*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 20,500*self.Scale) + VectorRand():GetNormalized()*100*self.Scale )
@@ -80,7 +80,7 @@ function EFFECT:Dust()
 	end
 
 	// Composite dust
-	for i=0, 10*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/particle_composite", self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 0,400*self.Scale) + VectorRand():GetNormalized()*5*self.Scale )
@@ -98,7 +98,7 @@ function EFFECT:Dust()
 	end
 	
 	// Cement flecks
-	for i=0, 15*self.Scale do
+	for i=0, 10*self.Scale do
 		local Debris = self.Emitter:Add( "effects/fleck_cement"..math.random(1,2), self.Pos )
 		if (Debris) then
 		Debris:SetVelocity ( self.DirVec * math.random(200,300*self.Scale) + VectorRand():GetNormalized() * 300*self.Scale )
@@ -124,7 +124,7 @@ function EFFECT:Dirt()
 	self.Emitter = ParticleEmitter( self.Pos )
 	
 	// Smoke
-	for i=0, 15*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 20,500*self.Scale) + VectorRand():GetNormalized()*100*self.Scale )
@@ -142,7 +142,7 @@ function EFFECT:Dirt()
 	end
 
 	// Composite dust
-	for i=0, 10*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/particle_composite", self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 0,400*self.Scale) + VectorRand():GetNormalized()*5*self.Scale )
@@ -167,7 +167,7 @@ function EFFECT:Dirt()
 		Debris:SetDieTime( 20 )
 		Debris:SetStartAlpha( 255 )
 		Debris:SetEndAlpha( 0 )
-		Debris:SetStartSize( math.random(2,5*self.Scale) )
+		Debris:SetStartSize( math.random(2,4*self.Scale) )
 		Debris:SetRoll( math.Rand(0, 360) )
 		Debris:SetRollDelta( math.Rand(-5, 5) )			
 		Debris:SetAirResistance( math.Rand(50,200) ) 			 			
@@ -186,7 +186,7 @@ function EFFECT:Sand()
 	self.Emitter = ParticleEmitter( self.Pos )
 	
 	// Composite dust
-	for i=0, 15*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/particle_composite", self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 20,500*self.Scale) + VectorRand():GetNormalized()*100*self.Scale )
@@ -204,7 +204,7 @@ function EFFECT:Sand()
 	end
 
 	// Composite dust
-	for i=0, 20*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/particle_composite", self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 20,400*self.Scale) + VectorRand():GetNormalized()*20*self.Scale )
@@ -294,7 +294,7 @@ function EFFECT:Smoke()
 	end
 
 	// Smoke
-	for i=0, 10*self.Scale do
+	for i=0, 5*self.Scale do
 		local Smoke = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )
 		if (Smoke) then
 		Smoke:SetVelocity( self.DirVec * math.random( 20,70*self.Scale) + VectorRand():GetNormalized()*150*self.Scale )
@@ -374,7 +374,7 @@ function EFFECT:Wood()
 	end
 
 	// Wood fleck
-	for i=0, 15*self.Scale do
+	for i=0, 10*self.Scale do
 		local Debris = self.Emitter:Add( "effects/fleck_wood"..math.random(1,2), self.Pos+self.DirVec )
 		if (Debris) then
 		Debris:SetVelocity ( self.DirVec * math.random(50,300*self.Scale) + VectorRand():GetNormalized() * 300*self.Scale )
@@ -417,7 +417,7 @@ function EFFECT:Glass()
 	end
 	
 	// Glass feck
-	for i=0, 10*self.Scale do
+	for i=0, 5*self.Scale do
 		local Debris = self.Emitter:Add( "effects/fleck_glass"..math.random(1,3), self.Pos )
 		if (Debris) then
 		Debris:SetVelocity ( self.PenVec * math.random(0,300)*self.Scale + VectorRand():GetNormalized() * 100*self.Scale )
@@ -427,7 +427,7 @@ function EFFECT:Glass()
 		Debris:SetStartSize( math.random(1,2*self.Scale) )
 		Debris:SetRoll( math.Rand(0, 360) )
 		Debris:SetRollDelta( math.Rand(-15, 15) )			
-		Debris:SetAirResistance( 50 ) 			 			
+		Debris:SetAirResistance( math.Rand(50,150) ) 			 			
 		Debris:SetColor( 200,200,200 )
 		Debris:SetGravity( Vector( 0, 0, -600) ) 
 		Debris:SetCollide( true )
@@ -436,7 +436,7 @@ function EFFECT:Glass()
 	end
 
 	// Glass fleck
-	for i=0, 10*self.Scale do
+	for i=0, 5*self.Scale do
 		local Debris = self.Emitter:Add( "effects/fleck_glass"..math.random(1,3), self.Pos )
 		if (Debris) then
 		Debris:SetVelocity ( self.PenVec*-1 * math.random(30,500)*self.Scale + VectorRand():GetNormalized() * 100*self.Scale )
@@ -446,7 +446,7 @@ function EFFECT:Glass()
 		Debris:SetStartSize( math.random(3,5*self.Scale) )
 		Debris:SetRoll( math.Rand(0, 360) )
 		Debris:SetRollDelta( math.Rand(-15, 15) )			
-		Debris:SetAirResistance( 50 ) 			 			
+		Debris:SetAirResistance( math.Rand(50,150) ) 			 			
 		Debris:SetColor( 200,200,200 )
 		Debris:SetGravity( Vector( 0, 0, -600) ) 
 		Debris:SetCollide( true )
@@ -476,7 +476,7 @@ function EFFECT:Blood()
 	end
 
 		// Some mist for effect
-	for i=0, (15)*self.Scale do
+	for i=0, (10)*self.Scale do
 		local Mist = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )
 		if (Mist) then
 		Mist:SetVelocity( (self.PenVec*i*self.Scale*35) + (VectorRand():GetNormalized()*30*self.Scale) )
@@ -494,7 +494,7 @@ function EFFECT:Blood()
 	end
 
 	// Blood flecks
-	for i=0, (25)*self.Scale do
+	for i=0, (10)*self.Scale do
 		local Chunks = self.Emitter:Add( "effects/fleck_cement"..math.random(1,2), self.Pos )
 		if (Chunks) then
 		Chunks:SetVelocity ( (self.PenVec*self.Scale*math.Rand(-100, 300)) + (VectorRand():GetNormalized()*50*self.Scale) )

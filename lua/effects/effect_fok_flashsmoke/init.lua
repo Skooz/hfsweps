@@ -66,7 +66,7 @@ function EFFECT:Init(data)
 		particle:SetCollide(false)
 		
 		
-	for i=0, 15 do
+	for i=0, 5 do
 		local particle = emitter:Add("particle/smokesprites_000"..math.random(1,9), self.Position)
 		if not IsValid(data:GetEntity()) or not IsValid(self.WeaponEnt:GetOwner()) then return end
 		particle:SetVelocity(100 * self.Forward + 8 * VectorRand())
@@ -90,7 +90,6 @@ end
 	EFFECT:Think()
 ---------------------------------------------------------*/
 function EFFECT:Think()
-	return false
 end
 
 /*---------------------------------------------------------

@@ -17,7 +17,7 @@ CreateClientConVar("hfDotRed", 	"255", true, false, "R", 0, 255)
 CreateClientConVar("hfDotGreen", "0", true, false, "G", 0, 255)
 CreateClientConVar("hfDotBlue", "0", true, false, "B", 0, 255)
 CreateClientConVar("hfDotAlpha", "200", true, false, "A", 0, 255)
-CreateClientConVar("hfDotRadius", "2.5", true, false, "Radius", 0, 25)
+CreateClientConVar("hfDotRadius", "2.5", true, false, "Radius", 1, 25)
 CreateClientConVar("hfDotSegments", "8", true, false, "Segments", 3, 20)
 
 // Weapon Descriptions
@@ -240,6 +240,11 @@ function SWEP:DoDrawCrosshair( x, y )
 end
 
 
+function SWEP:ConfigLoad()
+	// Load the config files
+end
+
+
 // Setup Bodygroups
 // Ideally you want to configure this in the specific weapon files
 function SWEP:Config()
@@ -273,7 +278,7 @@ function SWEP:Config()
 	0 - none
 	1 - frontsight
 	*/
-	self.Owner:GetViewModel():SetBodygroup(3,1) 
+	self.Owner:GetViewModel():SetBodygroup(3,0) 
 
 	// AK Rail
 	/*
@@ -286,6 +291,7 @@ end
 
 function SWEP:ConfigMenu()
 	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and CLIENT then
+
 		// Frame
 		local Frame = vgui.Create( "DFrame" )
 		Frame:Center()
@@ -299,6 +305,7 @@ function SWEP:ConfigMenu()
 		Frame:OnClose()
 
 		local HandSlider = vgui.Create("DNumSlider", Frame)
+		HandSlider:SetValue(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt"))
 		HandSlider:SetPos( 30, 50 )		// Set the position
 		HandSlider:SetSize( 275, 15 )		// Set the size
 		HandSlider:SetText( "Hands" )		// Set the text above the slider
@@ -306,8 +313,9 @@ function SWEP:ConfigMenu()
 		HandSlider:SetMax( 2 )			// Set the maximum number you can slide to
 		HandSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
 		HandSlider:SetConVar( "hfHands" ) 	// Changes the ConVar when you slide
-
+		
 		local SightSlider = vgui.Create("DNumSlider", Frame)
+		SightSlider:SetValue(file.Read("hf_config/"..self.Owner:UniqueID().."_m4.txt"))
 		SightSlider:SetPos( 30, 100 )		// Set the position
 		SightSlider:SetSize( 275, 15 )		// Set the size
 		SightSlider:SetText( "Sight" )		// Set the text above the slider
@@ -315,14 +323,13 @@ function SWEP:ConfigMenu()
 		SightSlider:SetMax( 10 )			// Set the maximum number you can slide to
 		SightSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
 		SightSlider:SetConVar( "hfSight" ) 	// Changes the ConVar when you slide
-
 		
 		// Dot Size
 		local DotSizeSlider = vgui.Create("DNumSlider", Frame)
 		DotSizeSlider:SetPos( 30, 150 )		// Set the position
 		DotSizeSlider:SetSize( 275, 15 )		// Set the size
 		DotSizeSlider:SetText( "Dot Radius" )		// Set the text above the slider
-		DotSizeSlider:SetMin( 0 )				// Set the minimum number you can slide to
+		DotSizeSlider:SetMin( 1 )				// Set the minimum number you can slide to
 		DotSizeSlider:SetMax( 25 )			// Set the maximum number you can slide to
 		DotSizeSlider:SetDecimals( 1 )		// Decimal places - zero for whole number
 		DotSizeSlider:SetConVar( "hfDotRadius" ) 	// Changes the ConVar when you slide
@@ -352,6 +359,7 @@ function SWEP:ConfigMenu()
 		ColorPicker:SetConVarB("hfDotBlue")
 		ColorPicker:SetConVarA("hfDotAlpha")
 	end
+
 end
 
 
@@ -393,6 +401,8 @@ function SWEP:Deploy()
 
 	// Set the hold-type
 	self:SetWeaponHoldType(self.HoldType)
+	
+	self:ConfigLoad()
 
 	// Draw animations
 	if self:GetNWBool("FirstDeploy") then

@@ -63,8 +63,21 @@ SWEP.Offset = {
 
 SWEP.Sight = 1
 
+function SWEP:ConfigLoad()
+	// set hands, sight
+	if !file.Exists("hf_config/"..self.Owner:UniqueID()..".txt","DATA") then
+		file.CreateDir("hf_config")
+		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , 0 )
+		file.Write( "hf_config/"..self.Owner:UniqueID().."_m4.txt" , 0 )
+	else
+		GetConVar("hfHands"):SetInt(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt" ))
+		GetConVar("hfSight"):SetInt(file.Read("hf_config/"..self.Owner:UniqueID().."_m4.txt" ))
+	end
+end
+
 // Setup Bodygroups
 function SWEP:Config()
+
 	// Hands
 	// 0: homeless; 1: gaming addiction; 2: murican
 	self.Owner:GetViewModel():SetBodygroup(1,GetConVarNumber("hfHands"))
@@ -99,6 +112,12 @@ function SWEP:Config()
 	else // Iron pos
 		self.IronSightsPos 	= Vector (0, 0, 0)
 		self.IronSightsAng 	= Vector (-0.3, 0, 0)
+	end
+
+	// Save configs specific to this weapon
+	if GetConVarNumber("hfHands") != file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt") or GetConVarNumber("hfSight") != file.Read("hf_config/"..self.Owner:UniqueID().."_m4.txt") then
+		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , GetConVarNumber("hfHands"))
+		file.Write( "hf_config/"..self.Owner:UniqueID().."_m4.txt" , GetConVarNumber("hfSight"))
 	end
 end
 

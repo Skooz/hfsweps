@@ -9,6 +9,17 @@
 ~ Generic Default 	- dude, that's a dude
 ---------------------------------------------------------------------------------------*/
 
+// ConVars
+CreateClientConVar("hfHands", "0", true, false, "# of Hands", 0, 2)
+CreateClientConVar("hfSight", "1", true, false, "# of Sight", 0, 10)
+
+CreateClientConVar("hfDotRed", 	"255", true, false, "R", 0, 255)
+CreateClientConVar("hfDotGreen", "0", true, false, "G", 0, 255)
+CreateClientConVar("hfDotBlue", "0", true, false, "B", 0, 255)
+CreateClientConVar("hfDotAlpha", "200", true, false, "A", 0, 255)
+CreateClientConVar("hfDotRadius", "2.5", true, false, "Radius", 0, 25)
+CreateClientConVar("hfDotSegments", "8", true, false, "Segments", 3, 20)
+
 // Weapon Descriptions
 SWEP.Category				= "Homefront"
 SWEP.Author					= "\nZookie, Marlwolf, Magenta, Generic Default"
@@ -199,27 +210,30 @@ end
 
 
 function SWEP:DoDrawCrosshair( x, y )
-	surface.SetDrawColor( 255, 0, 0, 200)
-	draw.NoTexture()
 
 	if self:GetNWBool("InIron") then
-		// Draw a polygon
-		// Specifications
-		x = ScrW() / 2
-		y = ScrH() / 2
-		radius = 2.5
-		seg = 8	
-		// Calculations
-		local cir = {}
-		table.insert( cir, { x = x, y = y, u = 0.5, v = 0.5 } )
-		for i = 0, seg do
-			local a = math.rad( ( i / seg ) * -360 )
+		if self.Owner:GetViewModel():GetBodygroup(2) > 1 and self.Owner:GetViewModel():GetBodygroup(2) < 8 then
+			// Dot color
+			surface.SetDrawColor( GetConVarNumber("hfDotRed"), GetConVarNumber("hfDotGreen"), GetConVarNumber("hfDotBlue"), GetConVarNumber("hfDotAlpha") )
+			draw.NoTexture()
+			// Draw a polygon
+			// Specifications
+			x = ScrW() / 2
+			y = ScrH() / 2
+			radius 	= GetConVarNumber("hfDotRadius")
+			seg 	= GetConVarNumber("hfDotSegments")	
+			// Calculations
+			local cir = {}
+			table.insert( cir, { x = x, y = y, u = 0.5, v = 0.5 } )
+			for i = 0, seg do
+				local a = math.rad( ( i / seg ) * -360 )
+				table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
+			end
+			local a = math.rad( 0 ) -- This is needed for non absolute segment counts
 			table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
+			// Do draw
+			surface.DrawPoly( cir )
 		end
-		local a = math.rad( 0 ) -- This is needed for non absolute segment counts
-		table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
-		// Do draw
-		surface.DrawPoly( cir )
 		return true
 	end
 
@@ -267,6 +281,77 @@ function SWEP:Config()
 	1 - rail
 	*/
 	self.Owner:GetViewModel():SetBodygroup(4,0) 
+end
+
+
+function SWEP:ConfigMenu()
+	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and CLIENT then
+		// Frame
+		local Frame = vgui.Create( "DFrame" )
+		Frame:Center()
+		Frame:SetPos( 100,100 ) 
+		Frame:SetSize( 300, 600 ) 
+		Frame:SetTitle( "Config Menu" ) 
+		Frame:SetVisible( true ) 
+		Frame:SetDraggable( true ) 
+		Frame:ShowCloseButton( true ) 
+		Frame:MakePopup()
+		Frame:OnClose()
+
+		local HandSlider = vgui.Create("DNumSlider", Frame)
+		HandSlider:SetPos( 30, 50 )		// Set the position
+		HandSlider:SetSize( 275, 15 )		// Set the size
+		HandSlider:SetText( "Hands" )		// Set the text above the slider
+		HandSlider:SetMin( 0 )				// Set the minimum number you can slide to
+		HandSlider:SetMax( 2 )			// Set the maximum number you can slide to
+		HandSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
+		HandSlider:SetConVar( "hfHands" ) 	// Changes the ConVar when you slide
+
+		local SightSlider = vgui.Create("DNumSlider", Frame)
+		SightSlider:SetPos( 30, 100 )		// Set the position
+		SightSlider:SetSize( 275, 15 )		// Set the size
+		SightSlider:SetText( "Sight" )		// Set the text above the slider
+		SightSlider:SetMin( 0 )				// Set the minimum number you can slide to
+		SightSlider:SetMax( 10 )			// Set the maximum number you can slide to
+		SightSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
+		SightSlider:SetConVar( "hfSight" ) 	// Changes the ConVar when you slide
+
+		
+		// Dot Size
+		local DotSizeSlider = vgui.Create("DNumSlider", Frame)
+		DotSizeSlider:SetPos( 30, 150 )		// Set the position
+		DotSizeSlider:SetSize( 275, 15 )		// Set the size
+		DotSizeSlider:SetText( "Dot Radius" )		// Set the text above the slider
+		DotSizeSlider:SetMin( 0 )				// Set the minimum number you can slide to
+		DotSizeSlider:SetMax( 25 )			// Set the maximum number you can slide to
+		DotSizeSlider:SetDecimals( 1 )		// Decimal places - zero for whole number
+		DotSizeSlider:SetConVar( "hfDotRadius" ) 	// Changes the ConVar when you slide
+		
+		// Dot Segments
+		local DotSegmentSlider = vgui.Create("DNumSlider", Frame)
+		DotSegmentSlider:SetPos( 30, 200 )		// Set the position
+		DotSegmentSlider:SetSize( 275, 15 )		// Set the size
+		DotSegmentSlider:SetText( "Dot Segments" )		// Set the text above the slider
+		DotSegmentSlider:SetMin( 3 )				// Set the minimum number you can slide to
+		DotSegmentSlider:SetMax( 24 )			// Set the maximum number you can slide to
+		DotSegmentSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
+		DotSegmentSlider:SetConVar( "hfDotSegments" ) 	// Changes the ConVar when you slide
+
+		// Sight Dot
+		-- Color Picker
+		local ChosenColor = nil
+		local ColorPicker = vgui.Create( "DColorMixer", Frame )
+		ColorPicker:SetSize( 200, 200 )
+		ColorPicker:SetPos(50, Frame:GetTall() - 250)
+		ColorPicker:SetPalette( true )
+		ColorPicker:SetAlphaBar( true ) 
+		ColorPicker:SetWangs( true )
+		ColorPicker:SetColor( Color(GetConVarNumber("hfDotRed"), GetConVarNumber("hfDotGreen"), GetConVarNumber("hfDotBlue"), GetConVarNumber("hfDotAlpha")) )
+		ColorPicker:SetConVarR("hfDotRed")
+		ColorPicker:SetConVarG("hfDotGreen")
+		ColorPicker:SetConVarB("hfDotBlue")
+		ColorPicker:SetConVarA("hfDotAlpha")
+	end
 end
 
 
@@ -377,7 +462,7 @@ function SWEP:CanPrimaryAttack()
 	
 	if self:GetNWBool("UnderBarrel") then
 		self:SpecialAttack() // Do underbarrel attack
-	elseif CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then
+	elseif self.Owner:KeyDown(IN_USE) or CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then
 		return false
 	elseif self.Burst then
 		self:BurstAttack()
@@ -507,7 +592,6 @@ function SWEP:SpecialAttack()
 			self:SetNextPrimaryFire( CurTime() + 0.6 )
 			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") - 1)
 		else
-			print(self:GetNWInt("UnderMag"))
 			self:EmitSound( "Weapon_Pistol.Empty" )
 			self.Weapon:SetNextPrimaryFire( CurTime() + 1 )
 			return
@@ -858,10 +942,8 @@ function SWEP:Reload()
 				if IsValid(self.Weapon) and IsValid(self.Owner) then
 					if clip1 > 0 then
 						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
-						print("lol")
 					else
 						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
-						print("rofl")
 					end
 					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration() - 0.2)
 				end
@@ -945,7 +1027,7 @@ UnderBarrel
 ---------------------------------------------------------*/
 function SWEP:UnderBarrel()
 	if self.UnderLauncher or self.UnderKey then
-		if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and IsFirstTimePredicted() then
+		if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_ATTACK) and IsFirstTimePredicted() then
 			if CurTime() <= self:GetNWFloat("InReload") then return end
 			if !self:GetNWBool("UnderBarrel") then
 				self:SetNWBool("UnderBarrel", true)
@@ -1003,6 +1085,8 @@ Think
 - Think is called every frame / tick
 ---------------------------------------------------------*/
 function SWEP:Think()
+
+	self:ConfigMenu()
 
 	// Call custom functions
 	self:Config()

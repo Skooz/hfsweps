@@ -61,20 +61,31 @@ SWEP.Offset = {
 }
 
 
+SWEP.Sight = 1
+
 // Setup Bodygroups
 function SWEP:Config()
 	// Hands
 	// 0: homeless; 1: gaming addiction; 2: murican
-	self.Owner:GetViewModel():SetBodygroup(1,2)
-	
+	self.Owner:GetViewModel():SetBodygroup(1,GetConVarNumber("hfHands"))
+
 	// Sight
 	// 0: none; 1: ironsight; 2-7: dot; 8-10: acog
-	self.Owner:GetViewModel():SetBodygroup(2,1) 
+	self.Owner:GetViewModel():SetBodygroup(2,GetConVarNumber("hfSight")) 
 	
 	// Frontsight
-	self.Owner:GetViewModel():SetBodygroup(3,1) 
+	if self.Owner:GetViewModel():GetBodygroup(2) > 1 then
+		self.Owner:GetViewModel():SetBodygroup(3,0)
+	else
+		self.Owner:GetViewModel():SetBodygroup(3,1)
+	end
+
 	// AK Rail
-	self.Owner:GetViewModel():SetBodygroup(4,0) 
+	if self.Owner:GetViewModel():GetBodygroup(2) > 1 then
+		self.Owner:GetViewModel():SetBodygroup(4,1)
+	else
+		self.Owner:GetViewModel():SetBodygroup(4,0)
+	end
 
 	if self.Owner:GetViewModel():GetBodygroup(2) >= 8 then // Acog pos
 		self.IronSightsPos 	= Vector (0, 0, 0.6)
@@ -84,7 +95,7 @@ function SWEP:Config()
 	elseif self.Owner:GetViewModel():GetBodygroup(2) > 1 then // Red-dot pos
 		self.IronSightsPos 	= Vector (0, 0, 0.25)
 		self.IronSightsAng 	= Vector (0, 0, 0)
-		self.Secondary.Zoom	= 0.85
+		self.Secondary.Zoom	= 0.80
 	else // Iron pos
 		self.IronSightsPos 	= Vector (0, 0, 0)
 		self.IronSightsAng 	= Vector (-0.3, 0, 0)

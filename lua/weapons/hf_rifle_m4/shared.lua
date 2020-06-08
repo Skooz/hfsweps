@@ -60,22 +60,33 @@ SWEP.Offset = {
 	}
 }
 
+// Set filename here 
+local fileName = "_m4.txt"
 
-SWEP.Sight = 1
+/*---------------------------------------------------------
+ConfigLoad
 
+- Load configs unique to the weapon here.
+- This is called in Deploy
+---------------------------------------------------------*/
 function SWEP:ConfigLoad()
-	// set hands, sight
-	if !file.Exists("hf_config/"..self.Owner:UniqueID()..".txt","DATA") then
-		file.CreateDir("hf_config")
-		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , 0 )
-		file.Write( "hf_config/"..self.Owner:UniqueID().."_m4.txt" , 0 )
-	else
-		GetConVar("hfHands"):SetInt(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt" ))
-		GetConVar("hfSight"):SetInt(file.Read("hf_config/"..self.Owner:UniqueID().."_m4.txt" ))
+
+	// New file
+	if !file.Exists("hf_config/"..self.Owner:UniqueID()..fileName,"DATA") then
+		file.Write( "hf_config/"..self.Owner:UniqueID()..fileName , 1 )
 	end
+	// Load file
+	if file.Exists("hf_config/"..self.Owner:UniqueID()..fileName,"DATA") then
+		GetConVar("hfSight"):SetInt(file.Read("hf_config/"..self.Owner:UniqueID()..fileName ))
+	end
+	
 end
 
-// Setup Bodygroups
+/*---------------------------------------------------------
+Config
+
+- Set & update bodygroups here
+---------------------------------------------------------*/
 function SWEP:Config()
 
 	// Hands
@@ -100,6 +111,7 @@ function SWEP:Config()
 		self.Owner:GetViewModel():SetBodygroup(4,0)
 	end
 
+	// ADS positions
 	if self.Owner:GetViewModel():GetBodygroup(2) >= 8 then // Acog pos
 		self.IronSightsPos 	= Vector (0, 0, 0.6)
 		self.IronSightsAng 	= Vector (-0.8, 0, 0)
@@ -114,10 +126,8 @@ function SWEP:Config()
 		self.IronSightsAng 	= Vector (-0.3, 0, 0)
 	end
 
-	// Save configs specific to this weapon
-	if GetConVarNumber("hfHands") != file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt") or GetConVarNumber("hfSight") != file.Read("hf_config/"..self.Owner:UniqueID().."_m4.txt") then
-		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , GetConVarNumber("hfHands"))
-		file.Write( "hf_config/"..self.Owner:UniqueID().."_m4.txt" , GetConVarNumber("hfSight"))
+	// Save (write to disk) config for this weapon
+	if tonumber(GetConVarNumber("hfSight")) != tonumber(file.Read("hf_config/"..self.Owner:UniqueID()..fileName)) then
+		file.Write( "hf_config/"..self.Owner:UniqueID()..fileName , GetConVarNumber("hfSight"))
 	end
 end
-

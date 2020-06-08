@@ -12,6 +12,7 @@
 // ConVars
 CreateClientConVar("hfHands", "0", true, false, "# of Hands", 0, 2)
 CreateClientConVar("hfSight", "1", true, false, "# of Sight", 0, 10)
+CreateClientConVar("hfUnderbarrel", "0", true, false, "# of attachment", 0, 2)
 
 CreateClientConVar("hfDotRed", 	"255", true, false, "R", 0, 255)
 CreateClientConVar("hfDotGreen", "0", true, false, "G", 0, 255)
@@ -291,7 +292,6 @@ end
 
 function SWEP:ConfigMenu()
 	if self.Owner:KeyDown(IN_USE) and self.Owner:KeyPressed(IN_RELOAD) and CLIENT then
-
 		// Frame
 		local Frame = vgui.Create( "DFrame" )
 		Frame:Center()
@@ -304,18 +304,18 @@ function SWEP:ConfigMenu()
 		Frame:MakePopup()
 		Frame:OnClose()
 
+		// Hand slider
 		local HandSlider = vgui.Create("DNumSlider", Frame)
-		HandSlider:SetValue(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt"))
-		HandSlider:SetPos( 30, 50 )		// Set the position
+		HandSlider:SetPos( 30, 50 )			// Set the position
 		HandSlider:SetSize( 275, 15 )		// Set the size
 		HandSlider:SetText( "Hands" )		// Set the text above the slider
 		HandSlider:SetMin( 0 )				// Set the minimum number you can slide to
-		HandSlider:SetMax( 2 )			// Set the maximum number you can slide to
-		HandSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
+		HandSlider:SetMax( 2 )				// Set the maximum number you can slide to
+		HandSlider:SetDecimals( 0 )			// Decimal places - zero for whole number
 		HandSlider:SetConVar( "hfHands" ) 	// Changes the ConVar when you slide
 		
+		// Sight slider
 		local SightSlider = vgui.Create("DNumSlider", Frame)
-		SightSlider:SetValue(file.Read("hf_config/"..self.Owner:UniqueID().."_m4.txt"))
 		SightSlider:SetPos( 30, 100 )		// Set the position
 		SightSlider:SetSize( 275, 15 )		// Set the size
 		SightSlider:SetText( "Sight" )		// Set the text above the slider
@@ -326,22 +326,22 @@ function SWEP:ConfigMenu()
 		
 		// Dot Size
 		local DotSizeSlider = vgui.Create("DNumSlider", Frame)
-		DotSizeSlider:SetPos( 30, 150 )		// Set the position
-		DotSizeSlider:SetSize( 275, 15 )		// Set the size
+		DotSizeSlider:SetPos( 30, 250 )				// Set the position
+		DotSizeSlider:SetSize( 275, 15 )			// Set the size
 		DotSizeSlider:SetText( "Dot Radius" )		// Set the text above the slider
-		DotSizeSlider:SetMin( 1 )				// Set the minimum number you can slide to
-		DotSizeSlider:SetMax( 25 )			// Set the maximum number you can slide to
-		DotSizeSlider:SetDecimals( 1 )		// Decimal places - zero for whole number
+		DotSizeSlider:SetMin( 1 )					// Set the minimum number you can slide to
+		DotSizeSlider:SetMax( 25 )					// Set the maximum number you can slide to
+		DotSizeSlider:SetDecimals( 1 )				// Decimal places - zero for whole number
 		DotSizeSlider:SetConVar( "hfDotRadius" ) 	// Changes the ConVar when you slide
 		
 		// Dot Segments
 		local DotSegmentSlider = vgui.Create("DNumSlider", Frame)
-		DotSegmentSlider:SetPos( 30, 200 )		// Set the position
-		DotSegmentSlider:SetSize( 275, 15 )		// Set the size
+		DotSegmentSlider:SetPos( 30, 300 )				// Set the position
+		DotSegmentSlider:SetSize( 275, 15 )				// Set the size
 		DotSegmentSlider:SetText( "Dot Segments" )		// Set the text above the slider
-		DotSegmentSlider:SetMin( 3 )				// Set the minimum number you can slide to
-		DotSegmentSlider:SetMax( 24 )			// Set the maximum number you can slide to
-		DotSegmentSlider:SetDecimals( 0 )		// Decimal places - zero for whole number
+		DotSegmentSlider:SetMin( 3 )					// Set the minimum number you can slide to
+		DotSegmentSlider:SetMax( 24 )					// Set the maximum number you can slide to
+		DotSegmentSlider:SetDecimals( 0 )				// Decimal places - zero for whole number
 		DotSegmentSlider:SetConVar( "hfDotSegments" ) 	// Changes the ConVar when you slide
 
 		// Sight Dot
@@ -402,7 +402,15 @@ function SWEP:Deploy()
 	// Set the hold-type
 	self:SetWeaponHoldType(self.HoldType)
 	
-	self:ConfigLoad()
+	// Load Config (Hands & Sight)
+	if !file.Exists("hf_config/"..self.Owner:UniqueID().."_hfHands.txt","DATA") then
+		file.CreateDir("hf_config")
+		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , 0 )
+	end
+	if file.Exists("hf_config/"..self.Owner:UniqueID().."_hfHands.txt","DATA") then
+		GetConVar("hfHands"):SetInt(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt" ))
+	end
+	self:ConfigLoad() -- Configuration unique to the weapon
 
 	// Draw animations
 	if self:GetNWBool("FirstDeploy") then
@@ -1096,14 +1104,17 @@ Think
 ---------------------------------------------------------*/
 function SWEP:Think()
 
-	self:ConfigMenu()
-
 	// Call custom functions
 	self:Config()
+	self:ConfigMenu()
 	self:UnderBarrel()	// Toggle UnderBarrel
 	self:FiringSound()	// Firing loop sounds
 	self:HoldSights()	// Call SecondaryAttack if IN_ATTACK2 released
 	self:Sway()			// Set sway & bob values
+
+	if tonumber(GetConVarNumber("hfHands")) != tonumber(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt")) then
+		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , GetConVarNumber("hfHands"))
+	end
 
 end
 

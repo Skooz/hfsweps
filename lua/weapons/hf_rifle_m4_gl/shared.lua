@@ -121,7 +121,7 @@ function SWEP:Config()
 	// ADS positions
 	if self.Owner:GetViewModel():GetBodygroup(2) >= 8 then // Acog pos
 		self.IronSightsPos 	= Vector (0, 0, 0.6)
-		self.IronSightsAng 	= Vector (-0.8, 0, 0)
+		self.IronSightsAng 	= Vector (-0.75, -0.06, 0)
 		self.Secondary.Zoom	= 0.3
 		self:SetViewmodelFOV(90, 0.1)
 	elseif self.Owner:GetViewModel():GetBodygroup(2) > 1 then // Red-dot pos
@@ -131,6 +131,7 @@ function SWEP:Config()
 	else // Iron pos
 		self.IronSightsPos 	= Vector (0, 0, 0)
 		self.IronSightsAng 	= Vector (-0.3, 0, 0)
+		self.Secondary.Zoom	= 0.9
 	end
 
 	// Save (write to disk) config for this weapon

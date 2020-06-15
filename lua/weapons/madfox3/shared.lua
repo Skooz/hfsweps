@@ -235,7 +235,7 @@ function SWEP:DoDrawCrosshair( x, y )
 			// Do draw
 			surface.DrawPoly( cir )
 		end
-		return true
+		//return true
 	end
 
 end
@@ -272,7 +272,7 @@ function SWEP:Config()
 	9 - acog 2
 	10 - acog 3
 	*/
-	self.Owner:GetViewModel():SetBodygroup(2,1) 
+	self.Owner:GetViewModel():SetBodygroup(2,0) 
 	
 	// Frontsight
 	/*
@@ -359,7 +359,6 @@ function SWEP:ConfigMenu()
 		ColorPicker:SetConVarB("hfDotBlue")
 		ColorPicker:SetConVarA("hfDotAlpha")
 	end
-
 end
 
 
@@ -513,7 +512,7 @@ function SWEP:PrimaryAttack()
 	
 	// Shoot
 	if self.Shotgun then 
-		self:ShootBullet(self.Primary.Damage, 12, 0.05) 	-- damage, numbullets, cone
+		self:ShootBullet(self.Primary.Damage, 12, 0.04) 	-- damage, numbullets, cone
 	else
 		self:ShootBullet(self.Primary.Damage, 1, 0)
 	end

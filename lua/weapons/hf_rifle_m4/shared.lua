@@ -124,6 +124,7 @@ function SWEP:Config()
 	else // Iron pos
 		self.IronSightsPos 	= Vector (0, 0, 0)
 		self.IronSightsAng 	= Vector (-0.3, 0, 0)
+		self.Secondary.Zoom	= 0.9
 	end
 
 	// Save (write to disk) config for this weapon

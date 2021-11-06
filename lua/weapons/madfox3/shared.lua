@@ -480,9 +480,9 @@ CanPrimaryAttack
 ---------------------------------------------------------*/
 function SWEP:CanPrimaryAttack()
 
-	if self:GetNWBool("UnderBarrel") then
-		self:SpecialAttack() // Do underbarrel attack
-	elseif CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then
+	if self:GetNWBool("UnderBarrel") then // underbarrels!
+		self:SpecialAttack() 
+	elseif CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then // anim checks
 		return false
 	elseif self.Burst then
 		self:BurstAttack()
@@ -545,41 +545,37 @@ BurstAttack
 function SWEP:BurstAttack()
 
 	// Returns
-	if self.Weapon:Clip1() <= 0 or !IsFirstTimePredicted() then return end
+	if self.Weapon:Clip1() <= 0 then return end
 
-	// Animate (Scar has 'bursty' animation, so we call the anim here)
-	if self:GetNWBool("InIron") then
-		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
-	else
-		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	// Animate (Scar has single burst animation, so we call the anim first, here)
+	if SERVER then
+		if self:GetNWBool("InIron") then
+			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_2)
+		else
+			self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		end
 	end
 
 	// Sound
 	self.Weapon:EmitSound(self.Primary.Sound)
 	
-	// timers lol
-	self:ShootBullet(self.Primary.Damage, 1, 0) 	-- damage, numbullets, cone
-	self.Weapon:TakePrimaryAmmo(1)
-	self:ShootFX()
-	self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
-	timer.Simple(self.Weapon:GetNextPrimaryFire()-CurTime(),
-	function()
-		if IsFirstTimePredicted() and IsValid(self.Weapon) and IsValid(self.Owner) then
-			self:ShootBullet(self.Primary.Damage, 1, 0) 	-- damage, numbullets, cone
-			self.Weapon:TakePrimaryAmmo(1)
-			self:ShootFX()
-			self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
-			timer.Simple(self.Weapon:GetNextPrimaryFire()-CurTime(),
-			function()
-				if IsFirstTimePredicted() and IsValid(self.Weapon) and IsValid(self.Owner) then
-					self:ShootBullet(self.Primary.Damage, 1, 0) 	-- damage, numbullets, cone
-					self.Weapon:TakePrimaryAmmo(1)
-					self:ShootFX()
-					self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
-				end
-			end)
-		end
-	end)
+	// Let BurstThink() do the rest
+	self:SetNWInt("BurstAttack", 1)
+	
+end
+
+
+function SWEP:BurstThink()
+
+	if self:GetNWInt("BurstAttack") > 3 then // Burst limiter, magic number atm
+		self:SetNWInt("BurstAttack", 0)
+	elseif self:GetNWInt("BurstAttack") >= 1 and self.Weapon:GetNextPrimaryFire() < CurTime() then
+		self:ShootBullet(self.Primary.Damage, 1, 0) 	-- damage, numbullets, cone
+		self.Weapon:TakePrimaryAmmo(1)
+		self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
+		self:SetNWInt("BurstAttack", self:GetNWInt("BurstAttack")+1) // Increment burst
+	end
+
 end
 
 
@@ -722,7 +718,7 @@ DoImpactEffect
 - Modify the impact effect of bullets
 ---------------------------------------------------------*/
 function SWEP:DoImpactEffect( tr, nDamageType )
-	if ( tr.HitSky ) then return end
+	if ( tr.HitSky ) or !IsFirstTimePredicted() then return end
 	local fx = EffectData()
 	fx:SetOrigin( tr.HitPos + tr.HitNormal )
 	fx:SetNormal( tr.HitNormal )
@@ -923,7 +919,7 @@ function SWEP:Reload()
 	if self.Primary.Automatic then self.Weapon:StopSound(self.Primary.Sound) end
 
 	// Reload
-	if self:GetNWBool("UnderBarrel") then // Underbarrel reloads
+	if self:GetNWBool("UnderBarrel") then
 		self:ReloadUnderBarrel()
 	elseif self.Shotgun and self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 and IsFirstTimePredicted() then 
 		self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
@@ -931,13 +927,10 @@ function SWEP:Reload()
 			self.Weapon:SetClip1(self.Weapon:Clip1()+1)
 			self.Owner:RemoveAmmo(1, self:GetPrimaryAmmoType())
 		end)
-		
-
 		self:SetNWBool("LoadShells", true)
 		self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 	else // Regular Reload
 		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
-		// Animation
 		if self.BranchReload then // Branch reloads
 			local clip1 = self.Weapon:Clip1()
 			self.Weapon:DefaultReload(ACT_VM_RELOAD)
@@ -1005,8 +998,7 @@ function SWEP:ReloadUnderBarrel()
 			self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), 
-			function() // We don't have to reload anymore ~once we're done reloading~. Duh.
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function()
 				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
 					self:SetNWBool("UnderReload", false)
 				end
@@ -1026,8 +1018,7 @@ function SWEP:ReloadUnderBarrel()
 				numToReload = self.Weapon:Ammo2()
 			end
 			self.Weapon:TakeSecondaryAmmo(numToReload)
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
-			function()
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function()
 				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
 					self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
 					self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + numToReload) // Load more shells
@@ -1126,6 +1117,7 @@ function SWEP:Think()
 	self:HoldSights()	// Call SecondaryAttack if IN_ATTACK2 released
 	self:Sway()			// Set sway & bob values
 	self:ReloadThink()
+	self:BurstThink()
 
 	if tonumber(GetConVarNumber("hfHands")) != tonumber(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt")) then
 		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , GetConVarNumber("hfHands"))

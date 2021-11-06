@@ -88,7 +88,7 @@ function EFFECT:Think()
 	
 	if self.LifeTime < CurTime() then
 		self.Alpha = (self.Alpha or 255) - 2
-		self.Entity:SetColor(255, 255, 255, self.Alpha)
+		//self.Entity:SetColor(255, 255, 255, self.Alpha)
 	end
 
 	return self.Alpha > 2

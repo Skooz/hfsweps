@@ -38,24 +38,29 @@ local sounds={
 }
 
 function EFFECT:Init(data)
-self.Entity 		= data:GetEntity()		// Entity determines what is creating the dynamic light			//
-self.Pos 		= data:GetOrigin()		// Origin determines the global position of the effect			//
+self.Entity 		= data:GetEntity()		// Entity determines what is creating the dynamic light			//
+
+self.Pos 		= data:GetOrigin()		// Origin determines the global position of the effect			//
+
 self.Scale 		= data:GetScale()		// Scale determines how large the effect is				//
-self.Radius 		= data:GetRadius() or 1		// Radius determines what type of effect to create, default is Concrete	//
+self.Radius 		= data:GetRadius() or 1		// Radius determines what type of effect to create, default is Concrete	//
+
 self.DirVec 		= data:GetNormal()		// Normal determines the direction of impact for the effect		//
 self.PenVec 		= data:GetStart()		// PenVec determines the direction of the round for penetrations	//
 self.Particles 		= data:GetMagnitude()		// Particles determines how many puffs to make, primarily for "trails"	//
 self.Angle 		= self.DirVec:Angle()		// Angle is the angle of impact from Normal				//
 self.DebrizzlemyNizzle 	= 10+data:GetScale()		// Debrizzle my Nizzle is how many "trails" to make			//
-self.Size 		= 5*self.Scale			// Size is exclusively for the explosion "trails" size			//
-self.Emitter 		= ParticleEmitter( self.Pos )	// Emitter must be there so you don't get an error			//
+self.Size 		= 5*self.Scale			// Size is exclusively for the explosion "trails" size			//
+
+self.Emitter 		= ParticleEmitter( self.Pos )	// Emitter must be there so you don't get an error			//
+
 	
 
 			if self.Scale<1.2 then
-			sound.Play( "ambient/explosions/explode_" .. math.random(1, 4) .. ".wav", self.Pos, 100, 100, 1 )
+			sound.Play( "weapons/explode" .. math.random(3, 5) .. ".wav", self.Pos, 100, 100, 1 )
 			else
 			sound.Play( "Explosion.Boom", self.Pos, 100, 100, 1 )
-			sound.Play( "ambient/explosions/explode_" .. math.random(1, 4) .. ".wav", self.Pos, 100, 100, 1 )
+			sound.Play( "weapons/explode" .. math.random(3, 5) .. ".wav", self.Pos, 100, 100, 1 )
 			end
 
 
@@ -145,24 +150,28 @@ end
 		end
 		end
 
-		local Angle = self.DirVec:Angle()
+		local Angle = self.DirVec:Angle()
+
 		for i = 1, self.DebrizzlemyNizzle do 					/// This part makes the trailers ///
 		Angle:RotateAroundAxis(Angle:Forward(), (360/self.DebrizzlemyNizzle))
 		local DustRing = Angle:Up()
 		local RanVec = self.DirVec*math.Rand(1, 5) + (DustRing*math.Rand(2, 5))
 
 			for k = 3, self.Particles do
-			local Rcolor = math.random(-20,20)
+			local Rcolor = math.random(-20,20)
+
 			local particle1 = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )				
 			particle1:SetVelocity((VectorRand():GetNormalized()*math.Rand(1, 2) * self.Size) + (RanVec*self.Size*k*3.5))	
-			particle1:SetDieTime( math.Rand( 0.5, 4 )*self.Scale )	
+			particle1:SetDieTime( math.Rand( 0.5, 4 )*self.Scale )	
+
 			particle1:SetStartAlpha( math.Rand( 90, 100 ) )			
 			particle1:SetEndAlpha(0)	
 			particle1:SetGravity((VectorRand():GetNormalized()*math.Rand(5, 10)* self.Size) + Vector(0,0,-50))
 			particle1:SetAirResistance( 200+self.Scale*20 ) 		
 			particle1:SetStartSize( (5*self.Size)-((k/self.Particles)*self.Size*3) )	
 			particle1:SetEndSize( (20*self.Size)-((k/self.Particles)*self.Size) )
-			particle1:SetRoll( math.random( -500, 500 )/100 )	
+			particle1:SetRoll( math.random( -500, 500 )/100 )	
+
 			particle1:SetRollDelta( math.random( -0.5, 0.5 ) )	
 			particle1:SetColor( 90+Rcolor,87+Rcolor,80+Rcolor )
 			end
@@ -237,24 +246,28 @@ function EFFECT:Dirt()
 		end
 		end
 
-		local Angle = self.DirVec:Angle()
+		local Angle = self.DirVec:Angle()
+
 		for i = 1, self.DebrizzlemyNizzle do 					/// This part makes the trailers ///
 		Angle:RotateAroundAxis(Angle:Forward(), (360/self.DebrizzlemyNizzle))
 		local DustRing = Angle:Up()
 		local RanVec = self.DirVec*math.Rand(2, 6) + (DustRing*math.Rand(1, 4))	
 
 			for k = 3, self.Particles do
-			local Rcolor = math.random(-20,20)
+			local Rcolor = math.random(-20,20)
+
 			local particle1 = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )				
 			particle1:SetVelocity((VectorRand():GetNormalized()*math.Rand(1, 2) * self.Size) + (RanVec*self.Size*k*3.5))	
-			particle1:SetDieTime( math.Rand( 0.5, 4 )*self.Scale )	
+			particle1:SetDieTime( math.Rand( 0.5, 4 )*self.Scale )	
+
 			particle1:SetStartAlpha( math.Rand( 90, 100 ) )			
 			particle1:SetEndAlpha(0)	
 			particle1:SetGravity((VectorRand():GetNormalized()*math.Rand(5, 10)* self.Size) + Vector(0,0,-50))
 			particle1:SetAirResistance( 200+self.Scale*20 ) 		
 			particle1:SetStartSize( (5*self.Size)-((k/self.Particles)*self.Size*3) )	
 			particle1:SetEndSize( (20*self.Size)-((k/self.Particles)*self.Size) )
-			particle1:SetRoll( math.random( -500, 500 )/100 )	
+			particle1:SetRoll( math.random( -500, 500 )/100 )	
+
 			particle1:SetRollDelta( math.random( -0.5, 0.5 ) )	
 			particle1:SetColor( 90+Rcolor,83+Rcolor,68+Rcolor )
 			end
@@ -527,24 +540,28 @@ end
 		end
 		end
 
-		local Angle = self.DirVec:Angle()
+		local Angle = self.DirVec:Angle()
+
 		for i = 1, self.DebrizzlemyNizzle do 					/// This part makes the trailers ///
 		Angle:RotateAroundAxis(Angle:Forward(), (360/self.DebrizzlemyNizzle))
 		local DustRing = Angle:Up()
 		local RanVec = self.DirVec*math.Rand(1, 4) + (DustRing*math.Rand(3, 4))
 
 			for k = 3, self.Particles do
-			local Rcolor = math.random(-20,20)
+			local Rcolor = math.random(-20,20)
+
 			local particle1 = self.Emitter:Add( "particle/smokesprites_000"..math.random(1,9), self.Pos )				
 			particle1:SetVelocity((VectorRand():GetNormalized()*math.Rand(1, 2) * self.Size) + (RanVec*self.Size*k*3.5))	
-			particle1:SetDieTime( math.Rand( 0, 3 )*self.Scale )	
+			particle1:SetDieTime( math.Rand( 0, 3 )*self.Scale )	
+
 			particle1:SetStartAlpha( math.Rand( 90, 100 ) )			
 			particle1:SetEndAlpha(0)	
 			particle1:SetGravity((VectorRand():GetNormalized()*math.Rand(5, 10)* self.Size) + Vector(0,0,-50))
 			particle1:SetAirResistance( 200+self.Scale*20 ) 		
 			particle1:SetStartSize( (5*self.Size)-((k/self.Particles)*self.Size*3) )	
 			particle1:SetEndSize( (20*self.Size)-((k/self.Particles)*self.Size) )
-			particle1:SetRoll( math.random( -500, 500 )/100 )	
+			particle1:SetRoll( math.random( -500, 500 )/100 )	
+
 			particle1:SetRollDelta( math.random( -0.5, 0.5 ) )	
 			particle1:SetColor( 90+Rcolor,85+Rcolor,75+Rcolor )
 			end
@@ -806,6 +823,8 @@ end
 function EFFECT:Think( )
 return false
 end
-
-function EFFECT:Render()
+
+
+function EFFECT:Render()
+
 end

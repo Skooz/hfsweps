@@ -494,11 +494,11 @@ function EFFECT:Blood()
 	end
 
 	// Blood flecks
-	for i=0, (10)*self.Scale do
+	for i=0, (7)*self.Scale do
 		local Chunks = self.Emitter:Add( "effects/fleck_cement"..math.random(1,2), self.Pos )
 		if (Chunks) then
-		Chunks:SetVelocity ( (self.PenVec*self.Scale*math.Rand(-100, 300)) + (VectorRand():GetNormalized()*50*self.Scale) )
-		Chunks:SetDieTime( 10 )
+		Chunks:SetVelocity ( (self.DirVec * math.random(200,300*self.Scale) + VectorRand():GetNormalized() * 300*self.Scale)/4 )
+		Chunks:SetDieTime( 20 )
 		Chunks:SetStartAlpha( 255 )
 		Chunks:SetEndAlpha( 0 )
 		Chunks:SetStartSize( 3*self.Scale )
@@ -506,7 +506,7 @@ function EFFECT:Blood()
 		Chunks:SetRoll( math.Rand(0, 360) )
 		Chunks:SetRollDelta( math.Rand(-5, 5) )			
 		Chunks:SetAirResistance( 30 ) 			 			
-		Chunks:SetColor( 70,35,35 )
+		Chunks:SetColor( 100,0,0 )
 		Chunks:SetGravity( Vector( 0, 0, -600) ) 
 		Chunks:SetCollide( true )
 		Chunks:SetBounce( 0.01 )			

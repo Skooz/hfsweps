@@ -66,6 +66,7 @@ SWEP.Offset = {
 	}
 }
 
+
 /*
 ANIM LIST:
 
@@ -86,3 +87,17 @@ Reload: 		ACT_VM_RELOAD
 Reload Empty: 	ACT_VM_RELOAD_EMPTY
 
 */
+
+
+/*---------------------------------------------------------
+Config
+
+- Set & update bodygroups here
+---------------------------------------------------------*/
+function SWEP:Config()
+
+	// Hands
+	// 0: homeless; 1: gaming addiction; 2: murican
+	self.Owner:GetViewModel():SetBodygroup(1,GetConVarNumber("hfHands"))
+
+end

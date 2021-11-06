@@ -211,7 +211,7 @@ end
 
 
 function SWEP:DoDrawCrosshair( x, y )
-
+	
 	if self:GetNWBool("InIron") then
 		if self.Owner:GetViewModel():GetBodygroup(2) > 1 and self.Owner:GetViewModel():GetBodygroup(2) < 8 then
 			// Dot color
@@ -235,7 +235,7 @@ function SWEP:DoDrawCrosshair( x, y )
 			// Do draw
 			surface.DrawPoly( cir )
 		end
-		//return true
+		return true
 	end
 
 end
@@ -296,7 +296,7 @@ function SWEP:ConfigMenu()
 		local Frame = vgui.Create( "DFrame" )
 		Frame:Center()
 		Frame:SetPos( 100,100 ) 
-		Frame:SetSize( 300, 600 ) 
+		Frame:SetSize( 300, 425 ) 
 		Frame:SetTitle( "Config Menu" ) 
 		Frame:SetVisible( true ) 
 		Frame:SetDraggable( true ) 
@@ -316,7 +316,7 @@ function SWEP:ConfigMenu()
 		
 		// Sight slider
 		local SightSlider = vgui.Create("DNumSlider", Frame)
-		SightSlider:SetPos( 30, 100 )		// Set the position
+		SightSlider:SetPos( 30, 75 )		// Set the position
 		SightSlider:SetSize( 275, 15 )		// Set the size
 		SightSlider:SetText( "Sight" )		// Set the text above the slider
 		SightSlider:SetMin( 0 )				// Set the minimum number you can slide to
@@ -326,21 +326,21 @@ function SWEP:ConfigMenu()
 		
 		// Dot Size
 		local DotSizeSlider = vgui.Create("DNumSlider", Frame)
-		DotSizeSlider:SetPos( 30, 250 )				// Set the position
+		DotSizeSlider:SetPos( 30, 125 )				// Set the position
 		DotSizeSlider:SetSize( 275, 15 )			// Set the size
 		DotSizeSlider:SetText( "Dot Radius" )		// Set the text above the slider
 		DotSizeSlider:SetMin( 1 )					// Set the minimum number you can slide to
-		DotSizeSlider:SetMax( 25 )					// Set the maximum number you can slide to
+		DotSizeSlider:SetMax( 10 )					// Set the maximum number you can slide to
 		DotSizeSlider:SetDecimals( 1 )				// Decimal places - zero for whole number
 		DotSizeSlider:SetConVar( "hfDotRadius" ) 	// Changes the ConVar when you slide
 		
 		// Dot Segments
 		local DotSegmentSlider = vgui.Create("DNumSlider", Frame)
-		DotSegmentSlider:SetPos( 30, 300 )				// Set the position
+		DotSegmentSlider:SetPos( 30, 150 )				// Set the position
 		DotSegmentSlider:SetSize( 275, 15 )				// Set the size
 		DotSegmentSlider:SetText( "Dot Segments" )		// Set the text above the slider
 		DotSegmentSlider:SetMin( 3 )					// Set the minimum number you can slide to
-		DotSegmentSlider:SetMax( 24 )					// Set the maximum number you can slide to
+		DotSegmentSlider:SetMax( 8 )					// Set the maximum number you can slide to
 		DotSegmentSlider:SetDecimals( 0 )				// Decimal places - zero for whole number
 		DotSegmentSlider:SetConVar( "hfDotSegments" ) 	// Changes the ConVar when you slide
 
@@ -349,7 +349,7 @@ function SWEP:ConfigMenu()
 		local ChosenColor = nil
 		local ColorPicker = vgui.Create( "DColorMixer", Frame )
 		ColorPicker:SetSize( 200, 200 )
-		ColorPicker:SetPos(50, Frame:GetTall() - 250)
+		ColorPicker:SetPos(50, 200)
 		ColorPicker:SetPalette( true )
 		ColorPicker:SetAlphaBar( true ) 
 		ColorPicker:SetWangs( true )
@@ -363,7 +363,9 @@ end
 
 
 function SWEP:SetViewmodelFOV(toFOV, dur)
-	if not game.SinglePlayer() and not IsFirstTimePredicted() then return end // fix prediction in mp
+
+	//if not game.SinglePlayer() and not IsFirstTimePredicted() then return end // fix prediction in mp
+	if SERVER then return end
 
 	local shoulder_fov = 50		// the baseline viewmodel fov
 	local in_iron_fov = toFOV	// the fov we're switching to
@@ -387,6 +389,7 @@ function SWEP:SetViewmodelFOV(toFOV, dur)
 		end
 		self.ViewModelFOV = self.ViewModelFOV + amount_to_change
 	end
+
 end
 
 
@@ -476,10 +479,10 @@ CanPrimaryAttack
 - Can we attack? Return true if yes. False if no.
 ---------------------------------------------------------*/
 function SWEP:CanPrimaryAttack()
-	
+
 	if self:GetNWBool("UnderBarrel") then
 		self:SpecialAttack() // Do underbarrel attack
-	elseif self.Owner:KeyDown(IN_USE) or CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then
+	elseif CurTime() <= self:GetNWFloat("InReload") or CurTime() <= self:GetNWFloat("InHolster") or CurTime() <= self:GetNWFloat("InDeploy") then
 		return false
 	elseif self.Burst then
 		self:BurstAttack()
@@ -732,7 +735,7 @@ end
 /*---------------------------------------------------------
 FireRocket
 
-- Called in PrimaryAttack
+- Called in PrimaryAttacker
 - Rockets are entities, as are Generic Default's bullets
 ---------------------------------------------------------*/
 function SWEP:FireRocket(round) 
@@ -758,7 +761,7 @@ predicted and other junk.
 ---------------------------------------------------------*/
 function SWEP:SecondaryAttack()
 
-	if !IsFirstTimePredicted() then return end
+	if CLIENT then return end
 
 	if CurTime() < self:GetNWFloat("InReload") then return end
 	local zoom = self:GetNWFloat("PlayerFOV") * self.Secondary.Zoom
@@ -766,16 +769,14 @@ function SWEP:SecondaryAttack()
 	if !self:GetNWBool("InIron") then
 		self:SetNWBool("UnderBarrel", false)
 		self:SetNWBool("InIron", true)
-		//self.Owner:CrosshairDisable()
-		self.Owner:SetFOV(zoom, 0.2)
 		if !self.Sniper then self.Weapon:SendWeaponAnim(ACT_VM_IDLE_2) end
 		self:SetIronsights(true, self.Owner)
+		self.Owner:SetFOV(zoom, 0.2)
 	elseif self:GetNWBool("InIron") then
 		self:SetNWBool("InIron", false)
-		//self.Owner:CrosshairEnable()
-		self.Owner:SetFOV(0, 0.2)
 		if !self.Sniper then self.Weapon:SendWeaponAnim(ACT_VM_IDLE) end
 		self:SetIronsights(false, self.Owner)
+		self.Owner:SetFOV(0, 0.2)
 	end
 
 end
@@ -788,7 +789,7 @@ HoldSights
 ---------------------------------------------------------*/
 function SWEP:HoldSights()
 	// Hold for ADS
-	if self.Owner:KeyReleased(IN_ATTACK2) and self:GetNWBool("InIron") and IsFirstTimePredicted() then
+	if self.Owner:KeyReleased(IN_ATTACK2) and self:GetNWBool("InIron") then
 		self:SecondaryAttack()
 	end
 end
@@ -899,6 +900,7 @@ function SWEP:AdjustMouseSensitivity()
 end
 
 
+
 /*---------------------------------------------------------
 Reload
 
@@ -909,10 +911,13 @@ but hey, it works.
 function SWEP:Reload()
 
 	// Returns
-	if self.Owner:KeyDown(IN_USE) or CurTime() <= self:GetNWFloat("InReload")  then return end
+	if self.Owner:KeyDown(IN_USE) or CurTime() <= self:GetNWFloat("InReload") then return end
 
 	// Disable ironsights
-	if self:GetNWBool("InIron") then self:SecondaryAttack() end
+	if self:GetNWBool("InIron") then 
+		self.Owner:SetFOV(0, 0.2)
+		self:SecondaryAttack() 
+	end
 
 	// Stop sound
 	if self.Primary.Automatic then self.Weapon:StopSound(self.Primary.Sound) end
@@ -953,18 +958,8 @@ function SWEP:Reload()
 		if self.BranchReload then // Branch reloads
 			local clip1 = self.Weapon:Clip1()
 			self.Weapon:DefaultReload(ACT_VM_RELOAD)
-			self:SetNWFloat("InReload", CurTime() + 10)
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
-			function()
-				if IsValid(self.Weapon) and IsValid(self.Owner) then
-					if clip1 > 0 then
-						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
-					else
-						self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
-					end
-					self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration() - 0.2)
-				end
-			end)
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()+3)
+			self:SetNWBool("BranchReload", true) // do second animation
 		else // Other reloads
 			if self.Weapon:Clip1() <= 0 then
 				self.Weapon:DefaultReload(self.AnimReloadEmpty)
@@ -975,6 +970,24 @@ function SWEP:Reload()
 		end
 	end
 	
+end
+
+
+function SWEP:ReloadThink()
+	
+	// Queues up the finishing animation.
+	// Who's idea was it to pointlessly segment these animations, anyway? It's ACTUALLY retarded. 
+	if SERVER and self:GetNWBool("BranchReload") then
+		self:SetNWBool("BranchReload", false)
+		if self.Weapon:Clip1() > 0 then
+			self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_1)
+		else
+			self.Weapon:SendWeaponAnim(ACT_VM_DEPLOY_2)
+		end
+		self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()*0.6)
+	end
+	
+
 end
 
 
@@ -1096,6 +1109,7 @@ function SWEP:Sway()
 end
 
 
+
 /*---------------------------------------------------------
 Think
 
@@ -1110,6 +1124,7 @@ function SWEP:Think()
 	self:FiringSound()	// Firing loop sounds
 	self:HoldSights()	// Call SecondaryAttack if IN_ATTACK2 released
 	self:Sway()			// Set sway & bob values
+	self:ReloadThink()
 
 	if tonumber(GetConVarNumber("hfHands")) != tonumber(file.Read("hf_config/"..self.Owner:UniqueID().."_hfhands.txt")) then
 		file.Write( "hf_config/"..self.Owner:UniqueID().."_hfHands.txt" , GetConVarNumber("hfHands"))

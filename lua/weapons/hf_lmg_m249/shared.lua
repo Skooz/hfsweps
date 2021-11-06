@@ -12,7 +12,7 @@ SWEP.AdminSpawnable			= true
 SWEP.Primary.Sound 			= Sound("Weapon_HFM249.Single")
 SWEP.Primary.SoundEnd 		= Sound("Weapon_HFM249.SingleEnd")					
 SWEP.Primary.Damage			= 12							
-SWEP.Primary.RPM			= 650					// This is in Rounds Per Minute
+SWEP.Primary.RPM			= 700					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 200				// Size of a clip
 SWEP.Primary.DefaultClip	= 600				// Default number of bullets in a clip
 

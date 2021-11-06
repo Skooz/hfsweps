@@ -41,7 +41,7 @@ sound.Add({
 	name 	= "Weapon_HFM9.MagOut",
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
-	level = 90,
+	level = 60,
 	sound 	=  "weapons/homefront/m9/m9_magout.wav" 
 })
 util.PrecacheSound("Weapon_HFM9.MagOut")
@@ -50,7 +50,7 @@ sound.Add({
 	name 	= "Weapon_HFM9.MagIn",
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
-	level = 90,
+	level = 60,
 	sound 	=  "weapons/homefront/m9/m9_magin.wav" 
 })
 util.PrecacheSound("Weapon_HFM9.MagIn")
@@ -59,7 +59,7 @@ sound.Add({
 	name 	= "Weapon_HFM9.SlideBack",
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
-	level = 90,
+	level = 60,
 	sound 	=  "weapons/homefront/m9/m9_slideclink.wav" 
 })
 util.PrecacheSound("Weapon_HFM9.SlideBack")
@@ -68,7 +68,7 @@ sound.Add({
 	name 	= "Weapon_HFM9.SlideShunk",
 	channel = CHAN_STATIC,
 	volume 	= 1.0,
-	level = 90,
+	level = 60,
 	sound 	=  "weapons/homefront/m9/m9_slideclink.wav" 
 })
 util.PrecacheSound("Weapon_HFM9.SlideShunk")

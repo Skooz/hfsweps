@@ -11,13 +11,13 @@ SWEP.AdminSpawnable			= true
 // Primary
 SWEP.Primary.Sound 			= Sound("Weapon_HFM200.Single")
 SWEP.Primary.SoundEnd 		= Sound("")					
-SWEP.Primary.Damage			= 100							
+SWEP.Primary.Damage			= 300							
 SWEP.Primary.RPM			= 20					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 7				// Size of a clip
 SWEP.Primary.DefaultClip	= 28				// Default number of bullets in a clip
 
-SWEP.Primary.KickUp			= 4					// Maximum up recoil (rise)
-SWEP.Primary.KickDown		= -3					// Maximum down recoil (skeet)
+SWEP.Primary.KickUp			= 6					// Maximum up recoil (rise)
+SWEP.Primary.KickDown		= -4					// Maximum down recoil (skeet)
 SWEP.Primary.KickHorizontal	= 2					// Maximum side recoil (koolaid)
 
 SWEP.Primary.Automatic		= false				// Automatic/Semi Auto
@@ -84,3 +84,16 @@ SWEP.Offset = {
 	Forward = 0,	-- Rolling	(Left/Right)
 	}
 }
+
+/*---------------------------------------------------------
+Config
+
+- Set & update bodygroups here
+---------------------------------------------------------*/
+function SWEP:Config()
+
+	// Hands
+	// 0: homeless; 1: gaming addiction; 2: murican
+	self.Owner:GetViewModel():SetBodygroup(1,GetConVarNumber("hfHands"))
+
+end

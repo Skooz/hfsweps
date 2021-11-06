@@ -12,7 +12,7 @@ function ENT:Initialize()
 	self.Entity:PhysicsInit( SOLID_VPHYSICS )      -- Make us work with physics,  	
 	self.Entity:SetMoveType( MOVETYPE_NONE )   --after all, gmod is a physics  	
 	self.Entity:SetSolid( SOLID_NONE )        -- CHEESECAKE!    >:3           
-	self.Entity:SetColor(0,0,0,255)
+	//self.Entity:SetColor(0,0,0,255)
 end   
 
  function ENT:Think()

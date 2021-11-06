@@ -925,33 +925,16 @@ function SWEP:Reload()
 	// Reload
 	if self:GetNWBool("UnderBarrel") then // Underbarrel reloads
 		self:ReloadUnderBarrel()
-	elseif self.Shotgun and self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 then 
-		// this is pretty lazy, but the shell loading sequence is looped in the QC, so this is the easiest solution.
-		local numToReload = self.Primary.ClipSize - self.Weapon:Clip1()
+	elseif self.Shotgun and self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 and IsFirstTimePredicted() then 
 		self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-		self.Weapon:SetClip1(self.Weapon:Clip1()+1)
-		self.Owner:RemoveAmmo( 1, self:GetPrimaryAmmoType() )
-		numToReload = numToReload - 1
-		if numToReload > self.Weapon:Ammo1() then
-			numToReload = self.Weapon:Ammo1()
-		end
-		self:SetClip1(self:Clip1() + numToReload)
-		self.Owner:RemoveAmmo( numToReload, self:GetPrimaryAmmoType() )
-		self:SetNWFloat("InReload", CurTime() + 3)
-		timer.Simple(self.Owner:GetViewModel():SequenceDuration(),
-		function()
-			if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
-				self.Weapon:SendWeaponAnim(ACT_VM_RELOAD)
-				self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()*numToReload)
-				timer.Simple(self.Owner:GetViewModel():SequenceDuration()*numToReload,
-				function()
-					if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
-						self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
-						self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-					end
-				end)
-			end
+		timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function() // may or may not keep timer
+			self.Weapon:SetClip1(self.Weapon:Clip1()+1)
+			self.Owner:RemoveAmmo(1, self:GetPrimaryAmmoType())
 		end)
+		
+
+		self:SetNWBool("LoadShells", true)
+		self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 	else // Regular Reload
 		if self.Weapon:Ammo1() <= 0 or self.Weapon:Clip1() >= self.Primary.ClipSize then return end
 		// Animation
@@ -975,8 +958,9 @@ end
 
 function SWEP:ReloadThink()
 	
-	// Queues up the finishing animation.
-	// Who's idea was it to pointlessly segment these animations, anyway? It's ACTUALLY retarded. 
+	// Branch Reloads
+	// -- DefaultReload stops Think(), therefore this is queued up right after the reload is finished.
+	// -- Who's idea was it to pointlessly segment these animations, anyway? It's ACTUALLY retarded. 
 	if SERVER and self:GetNWBool("BranchReload") then
 		self:SetNWBool("BranchReload", false)
 		if self.Weapon:Clip1() > 0 then
@@ -987,6 +971,23 @@ function SWEP:ReloadThink()
 		self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration()*0.6)
 	end
 	
+	// Shotgun Reload
+	// -- For these assets, the load shell anim is set to loop in the QC
+	if SERVER and self:GetNWBool("LoadShells") and CurTime() > self:GetNWFloat("InReload") then
+		if self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 then
+			self.Weapon:SendWeaponAnim(ACT_VM_RELOAD)
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.1)
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function() // may or may not keep timer
+				self.Weapon:SetClip1(self.Weapon:Clip1()+1)
+				self.Owner:RemoveAmmo(1, self:GetPrimaryAmmoType())
+			end)
+		else
+			self:SetNWBool("LoadShells", false)
+			self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH) // kinda unrealistic
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		end
+	end
 
 end
 

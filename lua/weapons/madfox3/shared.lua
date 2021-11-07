@@ -455,7 +455,7 @@ function SWEP:Holster(wep)
 	// Play an animation before actually holstering
 	if self:GetNWBool("FirstHolster") then
 		self:SetNWBool("FirstHolster", false)
-		self.Weapon:SendWeaponAnim(ACT_VM_HOLSTER)
+		if SERVER then self.Weapon:SendWeaponAnim(ACT_VM_HOLSTER) end
 		self:SetNWFloat("InHolster", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
@@ -570,8 +570,13 @@ function SWEP:BurstThink()
 	if self:GetNWInt("BurstAttack") > 3 then // Burst limiter, magic number atm
 		self:SetNWInt("BurstAttack", 0)
 	elseif self:GetNWInt("BurstAttack") >= 1 and self.Weapon:GetNextPrimaryFire() < CurTime() then
-		self:ShootBullet(self.Primary.Damage, 1, 0) 	-- damage, numbullets, cone
-		self.Weapon:TakePrimaryAmmo(1)
+		if IsFirstTimePredicted() then 
+			self:ShootBullet(self.Primary.Damage, 1, 0) -- damage, numbullets, cone
+		end	
+		self:ShootFX()
+		if SERVER then 
+			self.Weapon:TakePrimaryAmmo(1) 
+		end
 		self.Weapon:SetNextPrimaryFire(CurTime() + (1/(self.Primary.RPM/60)))
 		self:SetNWInt("BurstAttack", self:GetNWInt("BurstAttack")+1) // Increment burst
 	end
@@ -696,6 +701,7 @@ ShootBullet
 ---------------------------------------------------------*/
 function SWEP:ShootBullet( damage, num_bullets, aimcone )
 
+	self.Owner:LagCompensation( true )
 	local bullet = {}
 
 	bullet.Num 		= num_bullets
@@ -708,6 +714,7 @@ function SWEP:ShootBullet( damage, num_bullets, aimcone )
 	bullet.AmmoType = self.Primary.Ammo
 
 	self.Owner:FireBullets( bullet )
+	self.Owner:LagCompensation( false )
 
 end
 
@@ -718,7 +725,7 @@ DoImpactEffect
 - Modify the impact effect of bullets
 ---------------------------------------------------------*/
 function SWEP:DoImpactEffect( tr, nDamageType )
-	if ( tr.HitSky ) or !IsFirstTimePredicted() then return end
+	if ( tr.HitSky ) or !game.SinglePlayer() and !IsFirstTimePredicted() then return end
 	local fx = EffectData()
 	fx:SetOrigin( tr.HitPos + tr.HitNormal )
 	fx:SetNormal( tr.HitNormal )

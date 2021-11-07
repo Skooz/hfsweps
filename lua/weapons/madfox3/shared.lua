@@ -974,7 +974,15 @@ function SWEP:ReloadThink()
 	// Shotgun Reload
 	// -- For these assets, the load shell anim is set to loop in the QC
 	if SERVER and self:GetNWBool("LoadShells") and CurTime() > self:GetNWFloat("InReload") then
-		if self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 then
+		if self.UnderKey and self:GetNWInt("UnderMag") < 3 and self.Weapon:Ammo2() > 0 then 
+			self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.1)
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function() // may or may not keep timer
+				self:SetNWInt("UnderMag", self:GetNWInt("UnderMag")+1)
+				self.Weapon:TakeSecondaryAmmo(1)
+			end)
+		elseif self.Weapon:Clip1() < self.Primary.ClipSize and self.Weapon:Ammo1() > 0 then
 			self.Weapon:SendWeaponAnim(ACT_VM_RELOAD)
 			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.1)
@@ -1005,44 +1013,17 @@ function SWEP:ReloadUnderBarrel()
 			self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function()
-				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
-					self:SetNWBool("UnderReload", false)
-				end
-			end)	
+			self:SetNWBool("UnderReload", false)
 		end
 	elseif self.UnderKey then // Masterkey reload
 		if self:GetNWInt("UnderMag") < 3 and self.Weapon:Ammo2() > 0 then
-			local numToReload = 3 - self:GetNWInt("UnderMag")
-			self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START) 
-			self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + 1) // Load first shell
-			self.Weapon:TakeSecondaryAmmo(1)
-			numToReload = numToReload - 1
-			self.Weapon:SetNextPrimaryFire(CurTime() + 3)
-			self.Weapon:SetNextSecondaryFire(CurTime() + 3)
-			self:SetNWFloat("InReload", CurTime() + 3)
-			if numToReload > self.Weapon:Ammo2() then
-				numToReload = self.Weapon:Ammo2()
-			end
-			self.Weapon:TakeSecondaryAmmo(numToReload)
-			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function()
-				if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
-					self.Weapon:SendWeaponAnim(ACT_SHOTGUN_PUMP)
-					self:SetNWInt("UnderMag", self:GetNWInt("UnderMag") + numToReload) // Load more shells
-					self.Weapon:SetNextPrimaryFire(CurTime() + 3)
-					self.Weapon:SetNextSecondaryFire(CurTime() + 3)
-					self:SetNWFloat("InReload", CurTime() + 3)
-					timer.Simple(self.Owner:GetViewModel():SequenceDuration() * numToReload, // Repeat as many times as necessary
-					function()
-						if IsValid(self.Owner) and IsValid(self.Weapon) and IsFirstTimePredicted() then
-							self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
-							self.Weapon:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-							self.Weapon:SetNextSecondaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-							self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
-						end
-					end)
-				end
+			self.Weapon:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
+			timer.Simple(self.Owner:GetViewModel():SequenceDuration(), function() // may or may not keep timer
+				self:SetNWInt("UnderMag", self:GetNWInt("UnderMag")+1)
+				self.Weapon:TakeSecondaryAmmo(1)
 			end)
+			self:SetNWBool("LoadShells", true) // Let ReloadThink() handle the rest
+			self:SetNWFloat("InReload", CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		end
 	end
 
